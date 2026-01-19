@@ -101,13 +101,12 @@ public partial class MainViewModel : ObservableObject
 
     private async Task AutoRefreshQuotaAsync()
     {
-        if (!IsLoggedIn || CurrentAccount == null || IsLoading) return;
+        if (AllAccounts.Count == 0 || IsLoading) return;
 
         try
         {
-            // Silent refresh - don't show loading indicator
-            await RefreshQuotaInternalAsync();
-            LastRefreshTime = DateTime.Now;
+            // Silent refresh - don't show loading indicator for all accounts
+            await RefreshAllQuotasAsync();
             StatusMessage = $"Auto-refreshed at {LastRefreshTime:HH:mm:ss}";
         }
         catch
@@ -156,6 +155,9 @@ public partial class MainViewModel : ObservableObject
                 
                 // Refresh all account quotas on startup
                 await RefreshAllQuotasAsync();
+                
+                // Start auto-refresh timer
+                StartAutoRefreshTimer();
             }
         }
         catch (Exception ex)
