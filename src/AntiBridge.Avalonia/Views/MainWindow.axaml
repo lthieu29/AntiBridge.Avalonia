@@ -4,7 +4,8 @@
         x:Class="AntiBridge.Avalonia.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Title="AntiBridge - Antigravity Account Manager"
-        Width="500" Height="600"
+        Width="900" Height="650"
+        MinWidth="800" MinHeight="500"
         WindowStartupLocation="CenterScreen"
         Background="#1a1a2e">
 
@@ -15,205 +16,199 @@
     <Grid RowDefinitions="Auto,*,Auto" Margin="20">
         
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="🚀 AntiBridge" 
-                       FontSize="28" FontWeight="Bold" 
-                       Foreground="#00d9ff"
-                       HorizontalAlignment="Center"/>
-            <TextBlock Text="Antigravity Account Manager" 
-                       FontSize="14" 
-                       Foreground="#888"
-                       HorizontalAlignment="Center"/>
-        </StackPanel>
-
-        <!-- Main Content -->
-        <Border Grid.Row="1" 
-                Background="#16213e" 
-                CornerRadius="12" 
-                Padding="20">
-            <Panel>
-            <!-- Login View (when not logged in) -->
-            <StackPanel IsVisible="{Binding !IsLoggedIn}" 
-                        VerticalAlignment="Center"
-                        Spacing="20">
-                
-                <TextBlock Text="Login with your Google account to view quota"
-                           Foreground="#aaa"
-                           HorizontalAlignment="Center"
-                           TextWrapping="Wrap"/>
-                
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,15">
+            <StackPanel Orientation="Horizontal" Spacing="15">
+                <TextBlock Text="🚀 AntiBridge" 
+                           FontSize="24" FontWeight="Bold" 
+                           Foreground="#00d9ff"
+                           VerticalAlignment="Center"/>
+                <TextBlock Text="Account Manager" 
+                           FontSize="14" 
+                           Foreground="#666"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            
+            <!-- Action Buttons -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
                 <Button Command="{Binding LoginCommand}"
                         IsEnabled="{Binding !IsLoading}"
-                        HorizontalAlignment="Center"
-                        Padding="30,15"
+                        Padding="15,8"
                         Background="#4285f4"
                         Foreground="White"
                         FontWeight="SemiBold"
-                        CornerRadius="8">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <TextBlock Text="🔐" FontSize="18"/>
-                        <TextBlock Text="Login with Google" VerticalAlignment="Center"/>
+                        CornerRadius="6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="+" FontSize="16" FontWeight="Bold"/>
+                        <TextBlock Text="Add Account" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
-
-                <!-- Import from Antigravity -->
+                
+                <Button Command="{Binding RefreshAllQuotasCommand}"
+                        IsEnabled="{Binding !IsLoading}"
+                        Padding="15,8"
+                        Background="#00d9ff"
+                        Foreground="#1a1a2e"
+                        FontWeight="SemiBold"
+                        CornerRadius="6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="🔄" FontSize="14"/>
+                        <TextBlock Text="Refresh All" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                
                 <Button Command="{Binding ImportFromAntigravityCommand}"
                         IsEnabled="{Binding !IsLoading}"
                         IsVisible="{Binding IsAntigravityInstalled}"
-                        HorizontalAlignment="Center"
-                        Padding="25,12"
+                        Padding="15,8"
                         Background="#0f3460"
                         Foreground="#00d9ff"
                         FontWeight="SemiBold"
-                        CornerRadius="8">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="📥" FontSize="16"/>
-                        <TextBlock Text="Import from Antigravity" VerticalAlignment="Center"/>
+                        CornerRadius="6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="📥" FontSize="14"/>
+                        <TextBlock Text="Import" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
-
-                <!-- Loading indicator -->
-                <ProgressBar IsIndeterminate="True" 
-                             IsVisible="{Binding IsLoading}"
-                             Height="4"
-                             Margin="50,0"/>
             </StackPanel>
+        </Grid>
 
-            <!-- Dashboard View (when logged in) -->
-            <Grid IsVisible="{Binding IsLoggedIn}" RowDefinitions="Auto,*,Auto">
-                
-                <!-- Account Info -->
-                <Border Grid.Row="0" 
-                        Background="#0f3460" 
-                        CornerRadius="8" 
-                        Padding="15"
-                        Margin="0,0,0,15">
-                    <StackPanel Spacing="10">
-                        <!-- Current Account -->
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Text="{Binding CurrentAccount.Name}" 
-                                           FontSize="16" FontWeight="SemiBold"
-                                           Foreground="White"/>
-                                <TextBlock Text="{Binding CurrentAccount.Email}" 
-                                           FontSize="12"
-                                           Foreground="#888"/>
-                            </StackPanel>
-                            <Button Grid.Column="1" 
-                                    Command="{Binding LogoutCommand}"
-                                    Content="Logout"
-                                    Background="#e94560"
-                                    Foreground="White"
-                                    Padding="15,8"
-                                    CornerRadius="6"/>
-                        </Grid>
-                        
-                        <!-- Account Switcher (when multiple accounts) -->
-                        <Border IsVisible="{Binding HasMultipleAccounts}"
-                                Background="#1a1a2e"
-                                CornerRadius="6"
-                                Padding="10">
-                            <StackPanel Spacing="5">
-                                <TextBlock Text="Switch Account:" 
-                                           FontSize="11" 
-                                           Foreground="#666"/>
-                                <ComboBox ItemsSource="{Binding AllAccounts}"
-                                          SelectedItem="{Binding CurrentAccount}"
-                                          HorizontalAlignment="Stretch"
-                                          Background="#16213e"
-                                          Foreground="White">
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Email}" Foreground="White"/>
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
+        <!-- Main Content: Account Table -->
+        <Border Grid.Row="1" 
+                Background="#16213e" 
+                CornerRadius="12" 
+                Padding="0">
+            
+            <Grid RowDefinitions="Auto,*">
+                <!-- Table Header -->
+                <Border Grid.Row="0" Background="#0f3460" CornerRadius="12,12,0,0" Padding="15,12">
+                    <Grid ColumnDefinitions="*,350,100,100">
+                        <TextBlock Text="Email" FontWeight="SemiBold" Foreground="#888"/>
+                        <TextBlock Grid.Column="1" Text="Model Quota" FontWeight="SemiBold" Foreground="#888"/>
+                        <TextBlock Grid.Column="2" Text="Last Sync" FontWeight="SemiBold" Foreground="#888"/>
+                        <TextBlock Grid.Column="3" Text="Actions" FontWeight="SemiBold" Foreground="#888"/>
+                    </Grid>
                 </Border>
-
-                <!-- Model Quotas List -->
+                
+                <!-- Account List -->
                 <ScrollViewer Grid.Row="1">
-                    <ItemsControl ItemsSource="{Binding ModelQuotas}">
+                    <ItemsControl ItemsSource="{Binding AllAccountsWithQuota}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="#0f3460" 
-                                        CornerRadius="8" 
-                                        Padding="15" 
-                                        Margin="0,0,0,8">
-                                    <Grid RowDefinitions="Auto,Auto,Auto">
-                                        <Grid ColumnDefinitions="*,Auto">
-                                            <TextBlock Text="{Binding DisplayName}" 
-                                                       FontWeight="SemiBold"
-                                                       Foreground="White"/>
-                                            <TextBlock Grid.Column="1" 
-                                                       Text="{Binding PercentageText}"
-                                                       FontWeight="Bold"
-                                                       Foreground="{Binding ProgressColor}"/>
-                                        </Grid>
-                                        <Border Grid.Row="1" 
-                                                Height="6" 
-                                                CornerRadius="3"
-                                                Background="#1a1a2e"
-                                                Margin="0,8,0,0">
-                                            <Border HorizontalAlignment="Left"
-                                                    CornerRadius="3"
-                                                    Background="{Binding ProgressColor}">
-                                                <Border.Width>
-                                                    <MultiBinding>
-                                                        <Binding Path="Percentage"/>
-                                                    </MultiBinding>
-                                                </Border.Width>
-                                            </Border>
-                                        </Border>
-                                        <!-- Reset Time -->
-                                        <TextBlock Grid.Row="2" 
-                                                   Text="{Binding ResetTimeDisplay}"
-                                                   FontSize="11"
-                                                   Foreground="#666"
-                                                   Margin="0,6,0,0"/>
+                                <Border Background="{Binding RowBackground}" 
+                                        Padding="15,10"
+                                        BorderBrush="#1a1a2e"
+                                        BorderThickness="0,0,0,1">
+                                    <Grid ColumnDefinitions="*,350,100,100">
+                                        <!-- Email -->
+                                        <StackPanel VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{Binding Email}" 
+                                                           Foreground="White"
+                                                           FontWeight="SemiBold"/>
+                                                <!-- 403 Badge -->
+                                                <Border IsVisible="{Binding IsForbidden}"
+                                                        Background="#e94560"
+                                                        CornerRadius="4"
+                                                        Padding="6,2"
+                                                        ToolTip.Tip="{Binding ForbiddenTooltip}">
+                                                    <TextBlock Text="{Binding ForbiddenBadge}" 
+                                                               Foreground="White"
+                                                               FontSize="10"
+                                                               FontWeight="Bold"/>
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Name}" 
+                                                       Foreground="#666"
+                                                       FontSize="11"
+                                                       IsVisible="{Binding Name, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                        </StackPanel>
+                                        
+                                        <!-- Combined Model Quota (Gemini on top, Claude below) -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6">
+                                            <!-- Gemini 3 Pro -->
+                                            <Grid ColumnDefinitions="100,80,*">
+                                                <TextBlock Text="Gemini 3 Pro" Foreground="#888" FontSize="12"/>
+                                                <Border Grid.Column="1" Height="6" CornerRadius="3" Background="#1a1a2e">
+                                                    <Border HorizontalAlignment="Left"
+                                                            CornerRadius="3"
+                                                            Background="{Binding Gemini3ProColor}"
+                                                            Width="{Binding Gemini3ProWidth}"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="10,0,0,0">
+                                                    <TextBlock Text="{Binding Gemini3ProText}" 
+                                                               Foreground="{Binding Gemini3ProColor}"
+                                                               FontWeight="SemiBold"
+                                                               FontSize="12"
+                                                               Width="35"/>
+                                                    <TextBlock Text="{Binding Gemini3ProReset}" 
+                                                               Foreground="#00d9ff" FontSize="11"
+                                                               VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            
+                                            <!-- Claude 4.5 -->
+                                            <Grid ColumnDefinitions="100,80,*">
+                                                <TextBlock Text="Claude 4.5" Foreground="#888" FontSize="12"/>
+                                                <Border Grid.Column="1" Height="6" CornerRadius="3" Background="#1a1a2e">
+                                                    <Border HorizontalAlignment="Left"
+                                                            CornerRadius="3"
+                                                            Background="{Binding Claude45Color}"
+                                                            Width="{Binding Claude45Width}"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="10,0,0,0">
+                                                    <TextBlock Text="{Binding Claude45Text}" 
+                                                               Foreground="{Binding Claude45Color}"
+                                                               FontWeight="SemiBold"
+                                                               FontSize="12"
+                                                               Width="35"/>
+                                                    <TextBlock Text="{Binding Claude45Reset}" 
+                                                               Foreground="#00d9ff" FontSize="11"
+                                                               VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                        
+                                        <!-- Last Sync -->
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding LastSyncDate}" 
+                                                       Foreground="#888"
+                                                       FontSize="12"/>
+                                            <TextBlock Text="{Binding LastSyncTime}" 
+                                                       Foreground="#555"
+                                                       FontSize="11"/>
+                                        </StackPanel>
+                                        
+                                        <!-- Actions -->
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="5" Width="100">
+                                            <Button Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).RefreshAccountCommand}"
+                                                    CommandParameter="{Binding Id}"
+                                                    Content="🔄"
+                                                    Padding="8"
+                                                    Background="Transparent"
+                                                    Foreground="#00d9ff"
+                                                    ToolTip.Tip="Refresh"/>
+                                            <Button Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).SyncAccountToAntigravityCommand}"
+                                                    CommandParameter="{Binding Id}"
+                                                    Content="📤"
+                                                    Padding="8"
+                                                    Background="Transparent"
+                                                    Foreground="#22c55e"
+                                                    ToolTip.Tip="Sync to Antigravity"/>
+                                            <Button Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).DeleteAccountCommand}"
+                                                    CommandParameter="{Binding Id}"
+                                                    Content="🗑️"
+                                                    Padding="8"
+                                                    Background="Transparent"
+                                                    Foreground="#e94560"
+                                                    ToolTip.Tip="Delete"/>
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
-
-                <!-- Action Buttons -->
-                <StackPanel Grid.Row="2" Spacing="10" Margin="0,15,0,0">
-                    <Button Command="{Binding RefreshQuotaCommand}"
-                            IsEnabled="{Binding !IsLoading}"
-                            HorizontalAlignment="Stretch"
-                            Padding="15"
-                            Background="#00d9ff"
-                            Foreground="#1a1a2e"
-                            FontWeight="SemiBold"
-                            CornerRadius="8">
-                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                            <TextBlock Text="🔄" FontSize="16"/>
-                            <TextBlock Text="Refresh Quota" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                    
-                    <!-- Sync to Antigravity -->
-                    <Button Command="{Binding SyncToAntigravityCommand}"
-                            IsEnabled="{Binding !IsLoading}"
-                            IsVisible="{Binding IsAntigravityInstalled}"
-                            HorizontalAlignment="Stretch"
-                            Padding="12"
-                            Background="#0f3460"
-                            Foreground="#22c55e"
-                            FontWeight="SemiBold"
-                            CornerRadius="8">
-                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                            <TextBlock Text="📤" FontSize="14"/>
-                            <TextBlock Text="Sync to Antigravity" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
             </Grid>
-            </Panel>
         </Border>
 
         <!-- Status Bar -->
@@ -222,16 +217,32 @@
                 CornerRadius="8" 
                 Padding="15,10"
                 Margin="0,15,0,0">
-            <Grid ColumnDefinitions="*,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto">
                 <TextBlock Text="{Binding StatusMessage}" 
                            Foreground="#888"
                            VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="1"
+                           Text="{Binding LastRefreshTimeText}" 
+                           Foreground="#555"
+                           VerticalAlignment="Center"
+                           Margin="0,0,20,0"/>
+                <TextBlock Grid.Column="2"
                            Text="{Binding ErrorMessage}" 
                            Foreground="#ef4444"
                            IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                            VerticalAlignment="Center"/>
             </Grid>
+        </Border>
+        
+        <!-- Loading Overlay -->
+        <Border Grid.RowSpan="3" 
+                Background="#80000000"
+                IsVisible="{Binding IsLoading}"
+                CornerRadius="12">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10">
+                <ProgressBar IsIndeterminate="True" Width="200"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="White"/>
+            </StackPanel>
         </Border>
     </Grid>
 </Window>

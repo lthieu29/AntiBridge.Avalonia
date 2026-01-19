@@ -49,6 +49,13 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private DateTime? _lastRefreshTime;
 
+    [ObservableProperty]
+    private List<AccountRowViewModel> _allAccountsWithQuota = [];
+
+    public string LastRefreshTimeText => LastRefreshTime.HasValue 
+        ? $"Last refresh: {LastRefreshTime:HH:mm:ss}" 
+        : "";
+
     public MainViewModel()
     {
         _oauthService = new OAuthService();
@@ -143,25 +150,12 @@ public partial class MainViewModel : ObservableObject
         {
             RefreshAccountList();
 
-            var savedAccount = _accountStorage.GetCurrentAccount();
-            if (savedAccount != null && !string.IsNullOrEmpty(savedAccount.Token.RefreshToken))
+            if (AllAccounts.Count > 0)
             {
-                StatusMessage = "Restoring previous session...";
+                StatusMessage = "Loading quotas...";
                 
-                // Refresh token to ensure it's valid
-                var freshToken = await _oauthService.RefreshAccessTokenAsync(savedAccount.Token.RefreshToken);
-                if (freshToken != null)
-                {
-                    savedAccount.Token = freshToken;
-                    _accountStorage.UpsertAccount(savedAccount.Email, savedAccount.Name, freshToken);
-                    
-                    CurrentAccount = savedAccount;
-                    IsLoggedIn = true;
-                    StatusMessage = $"Restored: {savedAccount.Email}";
-                    
-                    await RefreshQuotaAsync();
-                    StartAutoRefreshTimer();
-                }
+                // Refresh all account quotas on startup
+                await RefreshAllQuotasAsync();
             }
         }
         catch (Exception ex)
@@ -174,6 +168,12 @@ public partial class MainViewModel : ObservableObject
     {
         AllAccounts = _accountStorage.ListAccounts();
         HasMultipleAccounts = AllAccounts.Count > 1;
+        IsLoggedIn = AllAccounts.Count > 0;
+        
+        // Build table view model
+        AllAccountsWithQuota = AllAccounts
+            .Select((acc, idx) => new AccountRowViewModel(acc, idx))
+            .ToList();
     }
 
     [RelayCommand]
@@ -295,6 +295,139 @@ public partial class MainViewModel : ObservableObject
         ModelQuotas = [];
         IsLoggedIn = false;
         StatusMessage = "Logged out";
+    }
+
+    [RelayCommand]
+    private async Task RefreshAllQuotasAsync()
+    {
+        IsLoading = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var accounts = _accountStorage.ListAccounts();
+            int count = 0;
+
+            foreach (var account in accounts)
+            {
+                StatusMessage = $"Refreshing {account.Email}...";
+                
+                try
+                {
+                    // Ensure token is fresh
+                    var token = account.Token;
+                    if (token.IsExpired)
+                    {
+                        var newToken = await _oauthService.RefreshAccessTokenAsync(token.RefreshToken);
+                        if (newToken != null)
+                        {
+                            token = newToken;
+                            _accountStorage.UpsertAccount(account.Email, account.Name, newToken);
+                        }
+                    }
+
+                    // Fetch quota
+                    var quota = await _quotaService.FetchQuotaAsync(token.AccessToken);
+                    if (quota != null)
+                    {
+                        _accountStorage.UpdateAccountQuota(account.Id, quota);
+                        account.Quota = quota;
+                        account.UpdateLastUsed();
+                        _accountStorage.UpsertAccount(account.Email, account.Name, account.Token);
+                    }
+                    count++;
+                }
+                catch { /* Continue with next account */ }
+            }
+
+            RefreshAccountList();
+            LastRefreshTime = DateTime.Now;
+            OnPropertyChanged(nameof(LastRefreshTimeText));
+            StatusMessage = $"Refreshed {count} accounts";
+            StartAutoRefreshTimer();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Refresh error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RefreshAccountAsync(string accountId)
+    {
+        if (string.IsNullOrEmpty(accountId)) return;
+
+        var account = _accountStorage.LoadAccount(accountId);
+        if (account == null) return;
+
+        try
+        {
+            StatusMessage = $"Refreshing {account.Email}...";
+
+            var token = account.Token;
+            if (token.IsExpired)
+            {
+                var newToken = await _oauthService.RefreshAccessTokenAsync(token.RefreshToken);
+                if (newToken != null)
+                {
+                    token = newToken;
+                    _accountStorage.UpsertAccount(account.Email, account.Name, newToken);
+                }
+            }
+
+            var quota = await _quotaService.FetchQuotaAsync(token.AccessToken);
+            if (quota != null)
+            {
+                _accountStorage.UpdateAccountQuota(account.Id, quota);
+                account.UpdateLastUsed();
+                _accountStorage.UpsertAccount(account.Email, account.Name, token);
+            }
+
+            RefreshAccountList();
+            StatusMessage = $"Refreshed {account.Email}";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Refresh error: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private async Task SyncAccountToAntigravity(string accountId)
+    {
+        if (string.IsNullOrEmpty(accountId)) return;
+        if (!IsAntigravityInstalled)
+        {
+            ErrorMessage = "Antigravity is not installed";
+            return;
+        }
+
+        var account = _accountStorage.LoadAccount(accountId);
+        if (account == null) return;
+
+        try
+        {
+            var success = _antigravityDb.InjectTokenToAntigravity(account.Token);
+            if (success)
+            {
+                StatusMessage = $"Synced {account.Email}. Restarting Antigravity...";
+                
+                // Restart Antigravity to apply new token
+                var processService = new AntigravityProcessService();
+                processService.OnStatusChanged += msg => StatusMessage = msg;
+                processService.OnError += msg => ErrorMessage = msg;
+                
+                await Task.Run(() => processService.RestartAntigravity());
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Sync error: {ex.Message}";
+        }
     }
 
     [RelayCommand]

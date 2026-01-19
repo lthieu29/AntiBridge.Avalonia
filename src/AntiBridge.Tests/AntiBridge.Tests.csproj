@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AntiBridge.Core\AntiBridge.Core.csproj" />
+    <ProjectReference Include="..\AntiBridge.Avalonia\AntiBridge.Avalonia.csproj" />
   </ItemGroup>
 
 </Project>
