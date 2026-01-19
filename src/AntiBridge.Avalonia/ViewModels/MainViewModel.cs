@@ -105,9 +105,12 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            // Silent refresh - don't show loading indicator for all accounts
-            await RefreshAllQuotasAsync();
-            StatusMessage = $"Auto-refreshed at {LastRefreshTime:HH:mm:ss}";
+            // Dispatch to UI thread since Timer.Elapsed runs on background thread
+            await global::Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                await RefreshAllQuotasAsync();
+                StatusMessage = $"Auto-refreshed at {LastRefreshTime:HH:mm:ss}";
+            });
         }
         catch
         {
