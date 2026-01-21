@@ -8,6 +8,7 @@ public class QuotaData
     public List<ModelQuota> Models { get; set; } = [];
     public bool IsForbidden { get; set; }
     public string? SubscriptionTier { get; set; }
+    public string? ProjectId { get; set; }
     public DateTime FetchedAt { get; set; } = DateTime.UtcNow;
 
     public void AddModel(string name, int percentage, string resetTime)

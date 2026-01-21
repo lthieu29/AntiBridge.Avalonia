@@ -1,121 +1,138 @@
 # 🚀 AntiBridge
 
-**Công cụ quản lý tài khoản Antigravity** - Theo dõi quota AI models, đồng bộ token, multi-account.
+**Proxy Server & Account Manager cho Antigravity** - Sử dụng subscription Antigravity với Claude Code, OpenCode và các AI coding tools khác.
 
 ## ✨ Tính năng
 
-| Tính năng                      | Mô tả                                                    |
-| ------------------------------ | -------------------------------------------------------- |
-| 🔐 **Đăng nhập Google OAuth**  | Đăng nhập một chạm bằng tài khoản Google                 |
-| 📊 **Theo dõi Quota**          | Xem quota Gemini 3 Pro và Claude 4.5 theo thời gian thực |
-| 👥 **Multi-Account**           | Quản lý nhiều tài khoản, chuyển đổi nhanh chóng          |
-| 🔄 **Auto-Refresh**            | Tự động cập nhật quota mỗi 15 phút                       |
-| 📤 **Sync to Antigravity**     | Đồng bộ token và khởi động lại Antigravity IDE           |
-| 📥 **Import from Antigravity** | Import token từ Antigravity IDE đã cài đặt               |
-| 🔒 **Phát hiện 403**           | Hiển thị badge đỏ khi tài khoản bị chặn                  |
-| 💾 **Lưu phiên đăng nhập**     | Không cần đăng nhập lại mỗi khi mở app                   |
+| Tính năng | Mô tả |
+|-----------|-------|
+| 🌐 **Proxy Server** | HTTP proxy chuyển đổi Claude/OpenAI API sang Antigravity |
+| 🔐 **Đăng nhập Google OAuth** | Đăng nhập một chạm bằng tài khoản Google |
+| 📊 **Theo dõi Quota** | Xem quota Gemini 3 Pro và Claude 4.5 theo thời gian thực |
+| 👥 **Multi-Account** | Quản lý nhiều tài khoản, chuyển đổi nhanh chóng |
+| 🔄 **Auto-Refresh** | Tự động cập nhật quota mỗi 15 phút |
+| 📤 **Sync to Antigravity** | Đồng bộ token và khởi động lại Antigravity IDE |
+| 📥 **Import from Antigravity** | Import token từ Antigravity IDE đã cài đặt |
+
+## 🎯 Hỗ trợ Clients
+
+- **Claude Code** - Sử dụng với `ANTHROPIC_BASE_URL=http://127.0.0.1:8080`
+- **OpenCode** - Sử dụng OpenAI-compatible endpoint
+- **Cursor, Continue, Cline** - Bất kỳ client OpenAI-compatible
 
 ## 📋 Yêu cầu
 
 - **.NET 8.0 SDK** (để build từ source)
 - **Linux / Windows / macOS**
+- **Antigravity subscription** (Google account)
 
-## 🚀 Cài đặt & Chạy
+## 🚀 Quick Start
 
-### Cách 1: Chạy từ source
+### 1. Build & Run
 
 ```bash
 git clone <repo-url>
 cd AntiBridge.Avalonia
-dotnet restore
 dotnet run --project src/AntiBridge.Avalonia
 ```
 
-### Cách 2: Build bản publish (self-contained)
+### 2. Add Account
+
+Click **"+ Add Account"** để đăng nhập bằng Google account có Antigravity subscription.
+
+### 3. Start Proxy
+
+Click **"▶ Start"** trong Proxy Server panel. Default port: 8080.
+
+### 4. Cấu hình Claude Code
 
 ```bash
-# Linux
-dotnet publish src/AntiBridge.Avalonia -c Release -r linux-x64 --self-contained true -o ./publish
+# Set environment variables
+export ANTHROPIC_BASE_URL=http://127.0.0.1:8080
+export ANTHROPIC_API_KEY=dummy
 
-# Windows
-dotnet publish src/AntiBridge.Avalonia -c Release -r win-x64 --self-contained true -o ./publish
-
-# Chạy bản publish
-./publish/AntiBridge.Avalonia
+# Run Claude Code
+claude
 ```
 
-## 📖 Hướng dẫn sử dụng
+### 5. Cấu hình OpenCode
 
-### 1. Đăng nhập
+Trong config OpenCode:
+```yaml
+provider:
+  type: openai
+  base_url: http://127.0.0.1:8080/v1
+  api_key: dummy
+```
 
-- Nhấn **"+ Add Account"** để đăng nhập bằng Google
-- Hoặc nhấn **"📥 Import"** nếu đã cài Antigravity IDE
+## 🔌 API Endpoints
 
-### 2. Xem Quota
+| Endpoint | Description |
+|----------|-------------|
+| `GET /v1/models` | List available models |
+| `POST /v1/chat/completions` | OpenAI Chat Completions API |
+| `POST /v1/messages` | Claude Messages API |
+| `POST /v1/messages/count_tokens` | Claude Token Count API |
+
+## 🤖 Available Models
+
+Proxy expose tất cả models từ Antigravity subscription:
+- `gemini-3-pro-high` - Gemini 3 Pro
+- `claude-sonnet-4-20250514` - Claude 4.5 Sonnet
+- `claude-opus-4-20250514` - Claude 4.5 Opus
+- Và nhiều models khác...
+
+## 📖 Hướng dẫn chi tiết
+
+### Xem Quota
 
 - Sau khi đăng nhập, quota sẽ tự động hiển thị
 - **Gemini 3 Pro** và **Claude 4.5** hiển thị % còn lại
-- Màu xanh = >70%, Vàng = 30-70%, Đỏ = <30%
+- Màu xanh = >50%, Vàng = 20-50%, Đỏ = <20%
 
-### 3. Refresh Quota
+### Proxy Logs
 
-- Nhấn **"🔄 Refresh All"** để cập nhật quota tất cả tài khoản
-- Auto-refresh mỗi 15 phút (khi có tài khoản)
+- Xem real-time logs của requests đến proxy
+- Click **🗑️** để clear logs
 
-### 4. Sync to Antigravity
+### Sync to Antigravity
 
 - Nhấn **📤** để đồng bộ token sang Antigravity IDE
 - App sẽ tự động đóng và mở lại Antigravity
 
-### 5. Quản lý tài khoản
+## 🏗️ Build & Publish
 
-- **🔄** Refresh quota của tài khoản
-- **📤** Sync to Antigravity
-- **🗑️** Xóa tài khoản
+```bash
+# Build
+dotnet build
 
-### 6. Trạng thái 403
+# Publish (Windows)
+dotnet publish src/AntiBridge.Avalonia -c Release -r win-x64 --self-contained -o publish
 
-- Khi API trả về 403 Forbidden, badge **🔒 403** màu đỏ sẽ hiển thị
-- Nghĩa là tài khoản không có quyền truy cập Gemini Code Assist
+# Publish (Linux)
+dotnet publish src/AntiBridge.Avalonia -c Release -r linux-x64 --self-contained -o publish
 
-## ❓ Xử lý lỗi thường gặp
+# Publish (macOS)
+dotnet publish src/AntiBridge.Avalonia -c Release -r osx-x64 --self-contained -o publish
+```
 
-### Lỗi "Account not eligible for Gemini Code and Antigravity"
-
-Lỗi này xuất hiện khi Antigravity IDE sử dụng token cũ hoặc không hợp lệ. **AntiBridge giúp bạn sửa lỗi này chỉ với 3 bước:**
-
-1. **Mở AntiBridge** và đăng nhập bằng tài khoản Google của bạn
-2. **Nhấn nút �** (Sync to Antigravity) bên cạnh email tài khoản
-3. **Antigravity sẽ tự động khởi động lại** với token mới
-
-> 💡 **Mẹo:** Nếu vẫn gặp lỗi, thử đăng nhập lại trong AntiBridge rồi Sync to Antigravity.
-
-### Lỗi 403 Forbidden
-
-Khi thấy badge **🔒 403** màu đỏ bên cạnh email:
-
-- Tài khoản không có quyền truy cập Gemini Code Assist
-- Thử đăng nhập lại hoặc sử dụng tài khoản khác
-
----
-
-## �📁 Cấu trúc dự án
+## 📁 Cấu trúc dự án
 
 ```
 src/
 ├── AntiBridge.Core/           # Business logic
-│   ├── Models/                # Account, Token, Quota models
-│   └── Services/              # OAuth, Quota, Storage services
+│   ├── Models/                # Account, Token, Quota, ProxyConfig
+│   ├── Services/              # OAuth, Quota, Proxy, Executor
+│   └── Translator/            # Claude ↔ Antigravity, OpenAI ↔ Antigravity
 ├── AntiBridge.Avalonia/       # UI layer (Avalonia)
 │   ├── ViewModels/            # MVVM ViewModels
 │   └── Views/                 # AXAML views
-└── AntiBridge.Tests/          # Unit tests (NUnit)
+└── AntiBridge.Tests/          # Unit tests
 ```
 
 ## 📂 Dữ liệu lưu trữ
 
 Tài khoản được lưu tại:
-
 - **Linux/macOS:** `~/.antibridge/`
 - **Windows:** `%USERPROFILE%\.antibridge\`
 
@@ -125,14 +142,10 @@ Tài khoản được lưu tại:
 dotnet test
 ```
 
-**42 tests** bao gồm:
-
-- AccountStorageService, ProtobufHelper, Models
-- AccountRowViewModel, QuotaService, AntigravityProcessService
-
 ## 🙏 Credits
 
-Logic được port từ [Antigravity-Manager](https://github.com/lbjlaq/Antigravity-Manager) (Tauri/Rust).
+- Logic proxy được port từ [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+- Account management từ [Antigravity-Manager](https://github.com/lbjlaq/Antigravity-Manager)
 
 ## 📄 License
 

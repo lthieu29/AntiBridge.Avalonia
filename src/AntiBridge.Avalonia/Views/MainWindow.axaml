@@ -3,9 +3,9 @@
         xmlns:vm="using:AntiBridge.Avalonia.ViewModels"
         x:Class="AntiBridge.Avalonia.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Title="AntiBridge - Antigravity Account Manager"
-        Width="900" Height="650"
-        MinWidth="800" MinHeight="500"
+        Title="AntiBridge - Antigravity Proxy &amp; Account Manager"
+        Width="1000" Height="750"
+        MinWidth="900" MinHeight="600"
         WindowStartupLocation="CenterScreen"
         Background="#1a1a2e">
 
@@ -13,7 +13,7 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*,Auto" Margin="20">
+    <Grid RowDefinitions="Auto,*,Auto,Auto" Margin="20">
         
         <!-- Header -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,15">
@@ -22,7 +22,7 @@
                            FontSize="24" FontWeight="Bold" 
                            Foreground="#00d9ff"
                            VerticalAlignment="Center"/>
-                <TextBlock Text="Account Manager" 
+                <TextBlock Text="Proxy &amp; Account Manager" 
                            FontSize="14" 
                            Foreground="#666"
                            VerticalAlignment="Center"/>
@@ -211,8 +211,113 @@
             </Grid>
         </Border>
 
-        <!-- Status Bar -->
+        <!-- Proxy Server Panel -->
         <Border Grid.Row="2" 
+                Background="#16213e" 
+                CornerRadius="12" 
+                Padding="15"
+                Margin="0,15,0,0">
+            <Grid RowDefinitions="Auto,Auto">
+                <!-- Proxy Controls -->
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto">
+                    <TextBlock Text="🌐 Proxy Server" 
+                               FontSize="16" FontWeight="SemiBold" 
+                               Foreground="#00d9ff"
+                               VerticalAlignment="Center"/>
+                    
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="20,0">
+                        <TextBlock Text="Port:" Foreground="#888" VerticalAlignment="Center"/>
+                        <TextBox Text="{Binding ProxyPort}" 
+                                 Width="70" 
+                                 IsEnabled="{Binding !IsProxyRunning}"
+                                 Background="#0f3460"
+                                 Foreground="White"
+                                 BorderBrush="#00d9ff"/>
+                        <TextBlock Text="{Binding ProxyStatusText}" 
+                                   Foreground="#888" 
+                                   VerticalAlignment="Center"
+                                   Margin="10,0"/>
+                    </StackPanel>
+                    
+                    <Button Grid.Column="2"
+                            Command="{Binding StartProxyCommand}"
+                            IsVisible="{Binding !IsProxyRunning}"
+                            Padding="15,8"
+                            Background="#22c55e"
+                            Foreground="White"
+                            FontWeight="SemiBold"
+                            CornerRadius="6"
+                            Margin="5,0">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="▶" FontSize="12"/>
+                            <TextBlock Text="Start" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Grid.Column="2"
+                            Command="{Binding StopProxyCommand}"
+                            IsVisible="{Binding IsProxyRunning}"
+                            Padding="15,8"
+                            Background="#e94560"
+                            Foreground="White"
+                            FontWeight="SemiBold"
+                            CornerRadius="6"
+                            Margin="5,0">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="⏹" FontSize="12"/>
+                            <TextBlock Text="Stop" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Grid.Column="3"
+                            Command="{Binding CopyProxyUrlCommand}"
+                            IsEnabled="{Binding IsProxyRunning}"
+                            Padding="10,8"
+                            Background="#0f3460"
+                            Foreground="#00d9ff"
+                            CornerRadius="6"
+                            Margin="5,0"
+                            ToolTip.Tip="Copy URL">
+                        <TextBlock Text="📋"/>
+                    </Button>
+                    
+                    <Button Grid.Column="4"
+                            Command="{Binding ClearProxyLogsCommand}"
+                            Padding="10,8"
+                            Background="#0f3460"
+                            Foreground="#888"
+                            CornerRadius="6"
+                            Margin="5,0"
+                            ToolTip.Tip="Clear Logs">
+                        <TextBlock Text="🗑️"/>
+                    </Button>
+                </Grid>
+                
+                <!-- Proxy Logs -->
+                <Border Grid.Row="1" 
+                        Background="#0f3460" 
+                        CornerRadius="6" 
+                        Margin="0,10,0,0"
+                        Padding="10"
+                        Height="100">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding ProxyLogs}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" 
+                                               Foreground="#888" 
+                                               FontFamily="Consolas,Courier New"
+                                               FontSize="11"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="3" 
                 Background="#16213e" 
                 CornerRadius="8" 
                 Padding="15,10"
@@ -235,7 +340,7 @@
         </Border>
         
         <!-- Loading Overlay -->
-        <Border Grid.RowSpan="3" 
+        <Border Grid.RowSpan="4" 
                 Background="#80000000"
                 IsVisible="{Binding IsLoading}"
                 CornerRadius="12">

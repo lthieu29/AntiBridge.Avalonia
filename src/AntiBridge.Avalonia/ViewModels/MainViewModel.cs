@@ -12,6 +12,10 @@ public partial class MainViewModel : ObservableObject
     private readonly AntigravityDbService _antigravityDb;
     private readonly AccountStorageService _accountStorage;
     private System.Timers.Timer? _autoRefreshTimer;
+    
+    // Proxy server
+    private ProxyServer? _proxyServer;
+    private AntigravityExecutor? _executor;
 
     // Auto-refresh interval in minutes (matches Antigravity-Manager default)
     private const int AutoRefreshIntervalMinutes = 15;
@@ -52,9 +56,26 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private List<AccountRowViewModel> _allAccountsWithQuota = [];
 
+    // Proxy server properties
+    [ObservableProperty]
+    private bool _isProxyRunning;
+
+    [ObservableProperty]
+    private string _proxyUrl = "http://127.0.0.1:8080";
+
+    [ObservableProperty]
+    private int _proxyPort = 8080;
+
+    [ObservableProperty]
+    private List<string> _proxyLogs = [];
+
     public string LastRefreshTimeText => LastRefreshTime.HasValue 
         ? $"Last refresh: {LastRefreshTime:HH:mm:ss}" 
         : "";
+
+    public string ProxyStatusText => IsProxyRunning 
+        ? $"✅ Running on {ProxyUrl}" 
+        : "⏹️ Stopped";
 
     public MainViewModel()
     {
@@ -622,6 +643,114 @@ public partial class MainViewModel : ObservableObject
         {
             IsLoading = false;
         }
+    }
+
+    // ==================== PROXY SERVER COMMANDS ====================
+
+    [RelayCommand]
+    private void StartProxy()
+    {
+        if (IsProxyRunning) return;
+        if (AllAccounts.Count == 0)
+        {
+            ErrorMessage = "Please add an account first";
+            return;
+        }
+
+        try
+        {
+            var config = new ProxyConfig { Port = ProxyPort };
+            _executor = new AntigravityExecutor(_oauthService, _accountStorage);
+            _proxyServer = new ProxyServer(_executor, _accountStorage, config);
+
+            _proxyServer.OnLog += msg =>
+            {
+                global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    var logs = new List<string>(ProxyLogs) { $"[{DateTime.Now:HH:mm:ss}] {msg}" };
+                    if (logs.Count > 100) logs.RemoveAt(0);
+                    ProxyLogs = logs;
+                });
+            };
+
+            _proxyServer.OnError += msg =>
+            {
+                global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    ErrorMessage = msg;
+                });
+            };
+
+            _proxyServer.OnStatusChanged += running =>
+            {
+                global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    IsProxyRunning = running;
+                    OnPropertyChanged(nameof(ProxyStatusText));
+                });
+            };
+
+            _proxyServer.Start();
+            ProxyUrl = _proxyServer.BaseUrl;
+            StatusMessage = $"Proxy started on {ProxyUrl}";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to start proxy: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private async Task StopProxyAsync()
+    {
+        if (!IsProxyRunning || _proxyServer == null) return;
+
+        try
+        {
+            await _proxyServer.StopAsync();
+            _proxyServer.Dispose();
+            _proxyServer = null;
+            _executor?.Dispose();
+            _executor = null;
+            StatusMessage = "Proxy stopped";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to stop proxy: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private void ClearProxyLogs()
+    {
+        ProxyLogs = [];
+    }
+
+    [RelayCommand]
+    private async Task CopyProxyUrlAsync()
+    {
+        try
+        {
+            if (global::Avalonia.Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                var clipboard = desktop.MainWindow?.Clipboard;
+                if (clipboard != null)
+                {
+                    await clipboard.SetTextAsync(ProxyUrl);
+                    StatusMessage = "Proxy URL copied to clipboard";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Copy failed: {ex.Message}";
+        }
+    }
+
+    partial void OnProxyPortChanged(int value)
+    {
+        ProxyUrl = $"http://127.0.0.1:{value}";
+        OnPropertyChanged(nameof(ProxyStatusText));
     }
 }
 
