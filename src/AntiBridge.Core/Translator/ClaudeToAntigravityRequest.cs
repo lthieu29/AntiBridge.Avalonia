@@ -10,6 +10,12 @@ namespace AntiBridge.Core.Translator;
 public static class ClaudeToAntigravityRequest
 {
     private const string SkipThoughtSignatureValidator = "skip_thought_signature_validator";
+    
+    /// <summary>
+    /// Interleaved thinking hint text to inject when tools and thinking are both enabled.
+    /// Requirement 4.2
+    /// </summary>
+    public const string InterleavedThinkingHintText = "Interleaved thinking is enabled. You may think between tool calls to reflect on tool outputs before proceeding.";
 
     /// <summary>
     /// Convert Claude request to Antigravity format
@@ -33,8 +39,17 @@ public static class ClaudeToAntigravityRequest
             }
         };
 
+        // Check if we should inject thinking hint (before processing system instruction)
+        var shouldInjectHint = ShouldInjectThinkingHint(root);
+
         // Process system instruction
         ProcessSystemInstruction(root, output);
+
+        // Inject interleaved thinking hint if needed (Requirement 4.1, 4.3, 4.4)
+        if (shouldInjectHint)
+        {
+            InjectThinkingHint(output);
+        }
 
         // Process messages -> contents
         ProcessMessages(root, output, modelName, signatureCache);
@@ -49,6 +64,64 @@ public static class ClaudeToAntigravityRequest
         AddSafetySettings(output);
 
         return System.Text.Encoding.UTF8.GetBytes(JsonHelper.Stringify(output));
+    }
+
+    /// <summary>
+    /// Check if interleaved thinking hint should be injected.
+    /// Returns true if request has both tools and thinking enabled.
+    /// Requirements 4.1, 4.3
+    /// </summary>
+    /// <param name="root">The root JSON node of the request</param>
+    /// <returns>True if hint should be injected</returns>
+    public static bool ShouldInjectThinkingHint(JsonNode? root)
+    {
+        if (root == null) return false;
+
+        // Check if tools are present
+        var tools = JsonHelper.GetPath(root, "tools") as JsonArray;
+        var hasTools = tools != null && tools.Count > 0;
+
+        // Check if thinking is enabled
+        var thinking = JsonHelper.GetPath(root, "thinking");
+        var thinkingType = JsonHelper.GetString(thinking, "type");
+        var hasThinking = thinkingType == "enabled";
+
+        // Requirement 4.1, 4.3: Only inject if BOTH tools and thinking are enabled
+        return hasTools && hasThinking;
+    }
+
+    /// <summary>
+    /// Inject interleaved thinking hint at the end of system instruction parts.
+    /// Requirements 4.2, 4.4
+    /// </summary>
+    /// <param name="output">The output JSON object</param>
+    public static void InjectThinkingHint(JsonObject output)
+    {
+        var request = output["request"] as JsonObject;
+        if (request == null) return;
+
+        // Get or create system instruction
+        var systemInstruction = request["systemInstruction"] as JsonObject;
+        if (systemInstruction == null)
+        {
+            systemInstruction = new JsonObject
+            {
+                ["role"] = "user",
+                ["parts"] = new JsonArray()
+            };
+            request["systemInstruction"] = systemInstruction;
+        }
+
+        // Get or create parts array
+        var parts = systemInstruction["parts"] as JsonArray;
+        if (parts == null)
+        {
+            parts = new JsonArray();
+            systemInstruction["parts"] = parts;
+        }
+
+        // Requirement 4.4: Add hint at the end of system instruction parts
+        parts.Add(new JsonObject { ["text"] = InterleavedThinkingHintText });
     }
 
     private static void ProcessSystemInstruction(JsonNode root, JsonObject output)
@@ -126,11 +199,75 @@ public static class ClaudeToAntigravityRequest
                 contentParts?.Add(new JsonObject { ["text"] = text });
             }
 
+            // Requirement 3.1: Reorder parts for "model" role (thinking blocks first)
+            if (geminiRole == "model" && contentParts?.Count > 0)
+            {
+                ReorderParts(contentParts);
+            }
+
             if (contentParts?.Count > 0)
             {
                 contents.Add(contentNode);
             }
         }
+    }
+
+    /// <summary>
+    /// Reorder parts so that thinking blocks come first, preserving relative order within each group.
+    /// Implements stable partitioning: thinking blocks first, then non-thinking parts.
+    /// Requirements 3.1, 3.2, 3.3
+    /// </summary>
+    /// <param name="parts">The parts array to reorder in place</param>
+    public static void ReorderParts(JsonArray parts)
+    {
+        if (parts == null || parts.Count <= 1)
+            return;
+
+        // Separate thinking and non-thinking parts while preserving order
+        var thinkingParts = new List<JsonNode?>();
+        var nonThinkingParts = new List<JsonNode?>();
+
+        foreach (var part in parts)
+        {
+            if (IsThinkingPart(part))
+            {
+                thinkingParts.Add(part?.DeepClone());
+            }
+            else
+            {
+                nonThinkingParts.Add(part?.DeepClone());
+            }
+        }
+
+        // Requirement 3.4: If no thinking blocks, keep original order
+        if (thinkingParts.Count == 0)
+            return;
+
+        // Clear and rebuild the array with thinking parts first
+        parts.Clear();
+
+        // Add thinking parts first (preserving their relative order - Requirement 3.2)
+        foreach (var part in thinkingParts)
+        {
+            parts.Add(part);
+        }
+
+        // Add non-thinking parts after (preserving their relative order - Requirement 3.3)
+        foreach (var part in nonThinkingParts)
+        {
+            parts.Add(part);
+        }
+    }
+
+    /// <summary>
+    /// Check if a part is a thinking block (has thought=true property)
+    /// </summary>
+    private static bool IsThinkingPart(JsonNode? part)
+    {
+        if (part == null) return false;
+        
+        var thought = JsonHelper.GetBool(part, "thought");
+        return thought == true;
     }
 
     private static void ProcessContentItem(JsonNode? content, JsonArray parts, string modelName, ISignatureCache? signatureCache)

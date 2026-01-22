@@ -61,10 +61,10 @@ public partial class MainViewModel : ObservableObject
     private bool _isProxyRunning;
 
     [ObservableProperty]
-    private string _proxyUrl = "http://127.0.0.1:8080";
+    private string _proxyUrl = "http://127.0.0.1:8081";
 
     [ObservableProperty]
-    private int _proxyPort = 8080;
+    private int _proxyPort = 8081;
 
     [ObservableProperty]
     private List<string> _proxyLogs = [];

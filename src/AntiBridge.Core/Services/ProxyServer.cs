@@ -16,6 +16,8 @@ public class ProxyServer : IDisposable
     private readonly AntigravityExecutor _executor;
     private readonly AccountStorageService _accountStorage;
     private readonly ProxyConfig _config;
+    private readonly ISignatureCache? _signatureCache;
+    private readonly ILoadBalancer? _loadBalancer;
     private CancellationTokenSource? _cts;
     private Task? _serverTask;
 
@@ -29,11 +31,15 @@ public class ProxyServer : IDisposable
     public ProxyServer(
         AntigravityExecutor executor,
         AccountStorageService accountStorage,
-        ProxyConfig? config = null)
+        ProxyConfig? config = null,
+        ISignatureCache? signatureCache = null,
+        ILoadBalancer? loadBalancer = null)
     {
         _executor = executor;
         _accountStorage = accountStorage;
         _config = config ?? new ProxyConfig();
+        _signatureCache = signatureCache;
+        _loadBalancer = loadBalancer;
         _listener = new HttpListener();
         
         _executor.OnLog += msg => OnLog?.Invoke($"[Executor] {msg}");
@@ -388,6 +394,18 @@ public class ProxyServer : IDisposable
 
     private Account? GetActiveAccount()
     {
+        // If LoadBalancer is configured, use it for account selection
+        // Requirements 5.1, 5.2, 5.3, 5.4, 5.5
+        if (_loadBalancer != null)
+        {
+            var account = _loadBalancer.GetNextAccount();
+            if (account != null)
+                return account;
+            
+            // Fallback to storage if LoadBalancer returns null (all rate limited)
+            // This allows manual account selection to still work
+        }
+
         var accounts = _accountStorage.ListAccounts();
         if (accounts.Count == 0) return null;
 

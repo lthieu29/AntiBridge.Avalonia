@@ -19,6 +19,7 @@ public class AntigravityExecutor : IDisposable
     private readonly OAuthService _oauthService;
     private readonly AccountStorageService _accountStorage;
     private readonly RetryOptions _retryOptions;
+    private readonly ILoadBalancer? _loadBalancer;
     
     private static readonly string[] BaseUrls = 
     [
@@ -31,12 +32,13 @@ public class AntigravityExecutor : IDisposable
 
     public event Action<string>? OnLog;
 
-    public AntigravityExecutor(OAuthService oauthService, AccountStorageService accountStorage, RetryOptions? retryOptions = null)
+    public AntigravityExecutor(OAuthService oauthService, AccountStorageService accountStorage, RetryOptions? retryOptions = null, ILoadBalancer? loadBalancer = null)
     {
         _httpClient = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
         _oauthService = oauthService;
         _accountStorage = accountStorage;
         _retryOptions = retryOptions ?? new RetryOptions();
+        _loadBalancer = loadBalancer;
     }
 
     /// <summary>
@@ -110,9 +112,37 @@ public class AntigravityExecutor : IDisposable
                             break; // Exit URL loop to handle 401 retry
                         }
                         
+                        // Handle 429 Too Many Requests - mark account rate limited
+                        // Requirements 5.3, 5.6
                         if (response.StatusCode == HttpStatusCode.TooManyRequests)
                         {
+                            if (_loadBalancer != null)
+                            {
+                                // Try to parse Retry-After header
+                                TimeSpan? retryAfter = null;
+                                if (response.Headers.TryGetValues("Retry-After", out var retryAfterValues))
+                                {
+                                    var retryAfterStr = retryAfterValues.FirstOrDefault();
+                                    if (int.TryParse(retryAfterStr, out var seconds))
+                                    {
+                                        retryAfter = TimeSpan.FromSeconds(seconds);
+                                    }
+                                }
+                                _loadBalancer.MarkRateLimited(account.Id, retryAfter);
+                                OnLog?.Invoke($"Account {account.Email} marked as rate limited");
+                            }
                             continue; // Try next URL
+                        }
+                        
+                        // Check for quota exceeded error
+                        if (error.Contains("quota", StringComparison.OrdinalIgnoreCase) || 
+                            error.Contains("exceeded", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (_loadBalancer != null)
+                            {
+                                _loadBalancer.MarkQuotaExceeded(account.Id);
+                                OnLog?.Invoke($"Account {account.Email} marked as quota exceeded");
+                            }
                         }
                         
                         throw new HttpRequestException($"Antigravity API error: {response.StatusCode} - {error}");
@@ -270,10 +300,41 @@ public class AntigravityExecutor : IDisposable
                             break; // Exit URL loop to handle 401 retry
                         }
                         
+                        // Handle 429 Too Many Requests - mark account rate limited
+                        // Requirements 5.3, 5.6
                         if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                        {
+                            if (_loadBalancer != null)
+                            {
+                                // Try to parse Retry-After header
+                                TimeSpan? retryAfter = null;
+                                if (response.Headers.TryGetValues("Retry-After", out var retryAfterValues))
+                                {
+                                    var retryAfterStr = retryAfterValues.FirstOrDefault();
+                                    if (int.TryParse(retryAfterStr, out var seconds))
+                                    {
+                                        retryAfter = TimeSpan.FromSeconds(seconds);
+                                    }
+                                }
+                                _loadBalancer.MarkRateLimited(account.Id, retryAfter);
+                                OnLog?.Invoke($"Account {account.Email} marked as rate limited");
+                            }
                             continue;
+                        }
                         
                         var errorMsg = await response.Content.ReadAsStringAsync(cancellationToken);
+                        
+                        // Check for quota exceeded error
+                        if (errorMsg.Contains("quota", StringComparison.OrdinalIgnoreCase) || 
+                            errorMsg.Contains("exceeded", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (_loadBalancer != null)
+                            {
+                                _loadBalancer.MarkQuotaExceeded(account.Id);
+                                OnLog?.Invoke($"Account {account.Email} marked as quota exceeded");
+                            }
+                        }
+                        
                         throw new HttpRequestException($"Antigravity API error: {response.StatusCode} - {errorMsg}");
                     }
 

@@ -16,7 +16,7 @@
 
 ## 🎯 Hỗ trợ Clients
 
-- **Claude Code** - Sử dụng với `ANTHROPIC_BASE_URL=http://127.0.0.1:8080`
+- **Claude Code** - Sử dụng với `ANTHROPIC_BASE_URL=http://127.0.0.1:8081`
 - **OpenCode** - Sử dụng OpenAI-compatible endpoint
 - **Cursor, Continue, Cline** - Bất kỳ client OpenAI-compatible
 
@@ -42,13 +42,13 @@ Click **"+ Add Account"** để đăng nhập bằng Google account có Antigrav
 
 ### 3. Start Proxy
 
-Click **"▶ Start"** trong Proxy Server panel. Default port: 8080.
+Click **"▶ Start"** trong Proxy Server panel. Default port: 8081.
 
 ### 4. Cấu hình Claude Code
 
 ```bash
 # Set environment variables
-export ANTHROPIC_BASE_URL=http://127.0.0.1:8080
+export ANTHROPIC_BASE_URL=http://127.0.0.1:8081
 export ANTHROPIC_API_KEY=dummy
 
 # Run Claude Code
@@ -61,7 +61,7 @@ Trong config OpenCode:
 ```yaml
 provider:
   type: openai
-  base_url: http://127.0.0.1:8080/v1
+  base_url: http://127.0.0.1:8081/v1
   api_key: dummy
 ```
 
