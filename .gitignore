@@ -1,3 +1,43 @@
+# .NET build output
 publish/
 bin/
 obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Antigravity-Manager (Tauri + React/Vite)
+Antigravity-Manager/node_modules/
+Antigravity-Manager/dist/
+Antigravity-Manager/dist-ssr/
+Antigravity-Manager/.vite/
+Antigravity-Manager/src-tauri/target/
+Antigravity-Manager/src-tauri/gen/
+Antigravity-Manager/src-tauri/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Python (nếu có scripts)
+__pycache__/
+*.pyc
+.venv/
+venv/
