@@ -28,5 +28,33 @@ public class Account
     [JsonPropertyName("last_used")]
     public long LastUsed { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
+    /// <summary>
+    /// Optional device fingerprint profile for this account.
+    /// When set, this profile is used to isolate the account's device identity.
+    /// </summary>
+    [JsonPropertyName("device_profile")]
+    public DeviceProfile? DeviceProfile { get; set; }
+
+    /// <summary>
+    /// History of previous device profiles for this account.
+    /// Old profiles are archived here when a new profile is set.
+    /// </summary>
+    [JsonPropertyName("device_history")]
+    public List<DeviceProfile> DeviceHistory { get; set; } = new();
+
     public void UpdateLastUsed() => LastUsed = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+    /// <summary>
+    /// Sets a new device profile for this account.
+    /// If a profile already exists, it is archived to the device history.
+    /// </summary>
+    /// <param name="profile">The new device profile to set.</param>
+    public void SetDeviceProfile(DeviceProfile profile)
+    {
+        if (DeviceProfile != null)
+        {
+            DeviceHistory.Add(DeviceProfile);
+        }
+        DeviceProfile = profile;
+    }
 }

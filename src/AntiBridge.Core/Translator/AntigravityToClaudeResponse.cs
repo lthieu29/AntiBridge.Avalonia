@@ -39,6 +39,199 @@ public static class AntigravityToClaudeResponse
 {
     private static long _toolUseIdCounter;
 
+    #region Response Processing Fixes (Task 10.3)
+
+    /// <summary>
+    /// Decodes a Base64-encoded signature to UTF-8 string.
+    /// Gemini sends Base64 encoded signatures, but Claude expects raw strings.
+    /// Ported from Rust response.rs: process_part() signature handling
+    /// </summary>
+    /// <param name="signature">The potentially Base64-encoded signature</param>
+    /// <returns>The decoded signature, or the original if not Base64</returns>
+    public static string DecodeBase64Signature(string? signature)
+    {
+        if (string.IsNullOrEmpty(signature))
+            return signature ?? "";
+
+        try
+        {
+            // Try to decode as Base64
+            var decodedBytes = Convert.FromBase64String(signature);
+            var decodedString = Encoding.UTF8.GetString(decodedBytes);
+            
+            // Verify it's valid UTF-8 text (not binary garbage)
+            // If the decoded string contains mostly printable characters, it's likely valid
+            if (IsPrintableString(decodedString))
+            {
+                return decodedString;
+            }
+            
+            // Not valid UTF-8 text, return original
+            return signature;
+        }
+        catch
+        {
+            // Not valid Base64, return original
+            return signature;
+        }
+    }
+
+    /// <summary>
+    /// Checks if a string contains mostly printable characters.
+    /// </summary>
+    private static bool IsPrintableString(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return false;
+        
+        int printableCount = 0;
+        foreach (var c in s)
+        {
+            if (char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsWhiteSpace(c) || char.IsSymbol(c))
+            {
+                printableCount++;
+            }
+        }
+        
+        // Consider it printable if at least 80% of characters are printable
+        return (double)printableCount / s.Length >= 0.8;
+    }
+
+    /// <summary>
+    /// Remaps function call arguments for Gemini → Claude compatibility.
+    /// Gemini sometimes uses different parameter names than specified in tool schema.
+    /// Ported from Rust: remap_function_call_args()
+    /// </summary>
+    /// <param name="toolName">The name of the tool being called</param>
+    /// <param name="args">The arguments object to remap (modified in place)</param>
+    public static void RemapFunctionCallArgs(string toolName, JsonObject? args)
+    {
+        if (args == null || string.IsNullOrEmpty(toolName))
+            return;
+
+        var toolNameLower = toolName.ToLowerInvariant();
+
+        switch (toolNameLower)
+        {
+            case "grep":
+            case "search":
+            case "search_code_definitions":
+            case "search_code_snippets":
+                // Gemini hallucination: maps parameter description to "description" field
+                if (args.ContainsKey("description") && !args.ContainsKey("pattern"))
+                {
+                    args["pattern"] = args["description"]?.DeepClone();
+                    args.Remove("description");
+                }
+
+                // Gemini uses "query", Claude Code expects "pattern"
+                if (args.ContainsKey("query") && !args.ContainsKey("pattern"))
+                {
+                    args["pattern"] = args["query"]?.DeepClone();
+                    args.Remove("query");
+                }
+
+                // Claude Code uses "path" (string), NOT "paths" (array)
+                RemapPathsToPath(args);
+                break;
+
+            case "glob":
+                // Same remapping as grep
+                if (args.ContainsKey("description") && !args.ContainsKey("pattern"))
+                {
+                    args["pattern"] = args["description"]?.DeepClone();
+                    args.Remove("description");
+                }
+
+                if (args.ContainsKey("query") && !args.ContainsKey("pattern"))
+                {
+                    args["pattern"] = args["query"]?.DeepClone();
+                    args.Remove("query");
+                }
+
+                RemapPathsToPath(args);
+                break;
+
+            case "read":
+                // Gemini might use "path" vs "file_path"
+                if (args.ContainsKey("path") && !args.ContainsKey("file_path"))
+                {
+                    args["file_path"] = args["path"]?.DeepClone();
+                    args.Remove("path");
+                }
+                break;
+
+            case "ls":
+                // LS tool: ensure "path" parameter exists
+                if (!args.ContainsKey("path"))
+                {
+                    args["path"] = ".";
+                }
+                break;
+
+            case "enterplanmode":
+                // EnterPlanMode tool: clear all args
+                var keys = args.Select(kvp => kvp.Key).ToList();
+                foreach (var key in keys)
+                {
+                    args.Remove(key);
+                }
+                break;
+
+            default:
+                // Generic property mapping for all tools
+                // If a tool has "paths" (array of 1) but no "path", convert it
+                RemapPathsToPath(args);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Remaps "paths" array to "path" string, taking the first element.
+    /// Adds default path "." if neither exists.
+    /// </summary>
+    private static void RemapPathsToPath(JsonObject args)
+    {
+        if (args.ContainsKey("path"))
+            return;
+
+        if (args.ContainsKey("paths"))
+        {
+            var paths = args["paths"];
+            string pathStr = ".";
+
+            if (paths is JsonArray pathsArray && pathsArray.Count > 0)
+            {
+                var firstPath = pathsArray[0];
+                if (firstPath is JsonValue pathVal)
+                {
+                    try
+                    {
+                        pathStr = pathVal.GetValue<string>();
+                    }
+                    catch { }
+                }
+            }
+            else if (paths is JsonValue pVal)
+            {
+                try
+                {
+                    pathStr = pVal.GetValue<string>();
+                }
+                catch { }
+            }
+
+            args["path"] = pathStr;
+            args.Remove("paths");
+        }
+        else
+        {
+            // Default to current directory if missing
+            args["path"] = ".";
+        }
+    }
+
+    #endregion
+
     /// <summary>
     /// Convert streaming response chunk
     /// </summary>
@@ -119,11 +312,14 @@ public static class AntigravityToClaudeResponse
 
                         if (!string.IsNullOrEmpty(thoughtSig))
                         {
+                            // Decode Base64 signature if needed (Task 10.3.1)
+                            var decodedSig = DecodeBase64Signature(thoughtSig);
+                            
                             // Store thinking text and signature in cache
                             if (signatureCache != null && state.CurrentThinkingText.Length > 0)
                             {
                                 var thinkingText = state.CurrentThinkingText.ToString();
-                                signatureCache.SetSignature(thinkingText, thoughtSig);
+                                signatureCache.SetSignature(thinkingText, decodedSig);
                             }
                             
                             // Signature delta
@@ -135,7 +331,7 @@ public static class AntigravityToClaudeResponse
                                 ["delta"] = new JsonObject
                                 {
                                     ["type"] = "signature_delta",
-                                    ["signature"] = $"{GetModelGroup(modelName)}#{thoughtSig}"
+                                    ["signature"] = $"{GetModelGroup(modelName)}#{decodedSig}"
                                 }
                             };
                             output2.Append($"data: {JsonHelper.Stringify(sigDelta)}\n\n\n");
@@ -279,9 +475,12 @@ public static class AntigravityToClaudeResponse
                     };
                     output2.Append($"data: {JsonHelper.Stringify(toolStart)}\n\n\n");
 
-                    var fcArgs = JsonHelper.GetPath(functionCall, "args");
+                    var fcArgs = JsonHelper.GetPath(functionCall, "args")?.DeepClone() as JsonObject;
                     if (fcArgs != null)
                     {
+                        // Remap function call arguments (Task 10.3)
+                        RemapFunctionCallArgs(fcName, fcArgs);
+                        
                         output2.Append("event: content_block_delta\n");
                         var argsDelta = new JsonObject
                         {
@@ -502,7 +701,8 @@ public static class AntigravityToClaudeResponse
                            ?? JsonHelper.GetString(part, "thought_signature");
                     if (!string.IsNullOrEmpty(sig))
                     {
-                        thinkingSignature = sig;
+                        // Decode Base64 signature if needed (Task 10.3.1)
+                        thinkingSignature = DecodeBase64Signature(sig);
                     }
                 }
 
@@ -532,12 +732,16 @@ public static class AntigravityToClaudeResponse
                     var name = JsonHelper.GetString(functionCall, "name") ?? "";
                     toolIdCounter++;
                     
+                    // Get and remap function call arguments (Task 10.3)
+                    var argsNode = JsonHelper.GetPath(functionCall, "args")?.DeepClone() as JsonObject ?? new JsonObject();
+                    RemapFunctionCallArgs(name, argsNode);
+                    
                     var toolBlock = new JsonObject
                     {
                         ["type"] = "tool_use",
                         ["id"] = $"tool_{toolIdCounter}",
                         ["name"] = name,
-                        ["input"] = JsonHelper.GetPath(functionCall, "args")?.DeepClone() ?? new JsonObject()
+                        ["input"] = argsNode
                     };
                     content!.Add(toolBlock);
                 }

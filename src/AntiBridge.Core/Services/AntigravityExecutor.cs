@@ -20,6 +20,7 @@ public class AntigravityExecutor : IDisposable
     private readonly AccountStorageService _accountStorage;
     private readonly RetryOptions _retryOptions;
     private readonly ILoadBalancer? _loadBalancer;
+    private DeviceProfile? _currentDeviceProfile;
     
     private static readonly string[] BaseUrls = 
     [
@@ -39,6 +40,32 @@ public class AntigravityExecutor : IDisposable
         _accountStorage = accountStorage;
         _retryOptions = retryOptions ?? new RetryOptions();
         _loadBalancer = loadBalancer;
+    }
+
+    /// <summary>
+    /// Set the device profile to use for subsequent requests.
+    /// When set, device fingerprint headers will be applied to outgoing requests.
+    /// </summary>
+    /// <param name="profile">The device profile to use, or null to use system defaults.</param>
+    public void SetDeviceProfile(DeviceProfile? profile)
+    {
+        _currentDeviceProfile = profile;
+    }
+
+    /// <summary>
+    /// Apply device profile headers to an HTTP request.
+    /// </summary>
+    /// <param name="request">The HTTP request to modify.</param>
+    private void ApplyDeviceProfileToRequest(HttpRequestMessage request)
+    {
+        if (_currentDeviceProfile == null)
+            return;
+
+        // Apply device fingerprint headers
+        request.Headers.TryAddWithoutValidation("X-Machine-Id", _currentDeviceProfile.MachineId);
+        request.Headers.TryAddWithoutValidation("X-Mac-Machine-Id", _currentDeviceProfile.MacMachineId);
+        request.Headers.TryAddWithoutValidation("X-Dev-Device-Id", _currentDeviceProfile.DevDeviceId);
+        request.Headers.TryAddWithoutValidation("X-Sqm-Id", _currentDeviceProfile.SqmId);
     }
 
     /// <summary>
@@ -95,6 +122,9 @@ public class AntigravityExecutor : IDisposable
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                     request.Headers.UserAgent.ParseAdd(ProxyConfig.DefaultUserAgent);
                     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+                    
+                    // Apply device profile headers (Task 8.4)
+                    ApplyDeviceProfileToRequest(request);
 
                     var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
@@ -285,6 +315,9 @@ public class AntigravityExecutor : IDisposable
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                     request.Headers.UserAgent.ParseAdd(ProxyConfig.DefaultUserAgent);
                     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    
+                    // Apply device profile headers (Task 8.4)
+                    ApplyDeviceProfileToRequest(request);
 
                     var response = await _httpClient.SendAsync(request, cancellationToken);
 
