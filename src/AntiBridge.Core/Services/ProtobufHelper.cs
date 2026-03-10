@@ -127,38 +127,10 @@ public static class ProtobufHelper
     }
 
     /// <summary>
-    /// Create OAuth Field 6 for injection into Antigravity state
-    /// Structure: access_token (1), token_type (2), refresh_token (3), expiry (4)
+    /// Mã hóa chuỗi thành protobuf string field (wire_type = 2).
+    /// Public version của CreateStringField.
     /// </summary>
-    public static byte[] CreateOAuthField(string accessToken, string refreshToken, long expiryTimestamp)
-    {
-        // Field 1: access_token
-        var field1 = CreateStringField(1, accessToken);
-
-        // Field 2: token_type = "Bearer"
-        var field2 = CreateStringField(2, "Bearer");
-
-        // Field 3: refresh_token
-        var field3 = CreateStringField(3, refreshToken);
-
-        // Field 4: expiry (nested Timestamp message with Field 1 = seconds)
-        var timestampInner = new List<byte>();
-        timestampInner.AddRange(EncodeVarint((1 << 3) | 0)); // Field 1, varint
-        timestampInner.AddRange(EncodeVarint((ulong)expiryTimestamp));
-        var field4 = CreateBytesField(4, timestampInner.ToArray());
-
-        // Combine all fields into OAuthTokenInfo message
-        var oauthInfo = new List<byte>();
-        oauthInfo.AddRange(field1);
-        oauthInfo.AddRange(field2);
-        oauthInfo.AddRange(field3);
-        oauthInfo.AddRange(field4);
-
-        // Wrap as Field 6 (length-delimited)
-        return CreateBytesField(6, oauthInfo.ToArray());
-    }
-
-    private static byte[] CreateStringField(int fieldNum, string value)
+    public static byte[] EncodeStringField(int fieldNum, string value)
     {
         var result = new List<byte>();
         result.AddRange(EncodeVarint((ulong)((fieldNum << 3) | 2))); // wire_type = 2
@@ -168,12 +140,59 @@ public static class ProtobufHelper
         return result.ToArray();
     }
 
-    private static byte[] CreateBytesField(int fieldNum, byte[] value)
+    /// <summary>
+    /// Mã hóa mảng byte thành protobuf length-delimited field (wire_type = 2).
+    /// Public version của CreateBytesField.
+    /// </summary>
+    public static byte[] EncodeLenDelimField(int fieldNum, byte[] value)
     {
         var result = new List<byte>();
         result.AddRange(EncodeVarint((ulong)((fieldNum << 3) | 2))); // wire_type = 2
         result.AddRange(EncodeVarint((ulong)value.Length));
         result.AddRange(value);
         return result.ToArray();
+    }
+
+    /// <summary>
+    /// Tạo OAuthTokenInfo message KHÔNG bao gồm wrapper Field 6.
+    /// Dùng cho New_Format nơi OAuthTokenInfo được base64 encode riêng.
+    /// Structure: Field 1 (access_token), Field 2 ("Bearer"), Field 3 (refresh_token), Field 4 (Timestamp)
+    /// </summary>
+    public static byte[] CreateOAuthInfo(string accessToken, string refreshToken, long expiryTimestamp)
+    {
+        // Field 1: access_token
+        var field1 = EncodeStringField(1, accessToken);
+
+        // Field 2: token_type = "Bearer"
+        var field2 = EncodeStringField(2, "Bearer");
+
+        // Field 3: refresh_token
+        var field3 = EncodeStringField(3, refreshToken);
+
+        // Field 4: expiry (nested Timestamp message with Field 1 = seconds)
+        var timestampInner = new List<byte>();
+        timestampInner.AddRange(EncodeVarint((1 << 3) | 0)); // Field 1, varint
+        timestampInner.AddRange(EncodeVarint((ulong)expiryTimestamp));
+        var field4 = EncodeLenDelimField(4, timestampInner.ToArray());
+
+        // Combine all fields into OAuthTokenInfo message
+        var oauthInfo = new List<byte>();
+        oauthInfo.AddRange(field1);
+        oauthInfo.AddRange(field2);
+        oauthInfo.AddRange(field3);
+        oauthInfo.AddRange(field4);
+
+        return oauthInfo.ToArray();
+    }
+
+    /// <summary>
+    /// Create OAuth Field 6 for injection into Antigravity state.
+    /// Wraps CreateOAuthInfo output in Field 6 (length-delimited).
+    /// Structure: access_token (1), token_type (2), refresh_token (3), expiry (4)
+    /// </summary>
+    public static byte[] CreateOAuthField(string accessToken, string refreshToken, long expiryTimestamp)
+    {
+        var oauthInfo = CreateOAuthInfo(accessToken, refreshToken, expiryTimestamp);
+        return EncodeLenDelimField(6, oauthInfo);
     }
 }

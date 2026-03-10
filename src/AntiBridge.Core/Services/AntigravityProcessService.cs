@@ -99,6 +99,13 @@ public class AntigravityProcessService
 
         Process.Start(psi);
     }
+    /// <summary>
+    /// Get the path to the Antigravity executable.
+    /// Returns null if not found on any known path.
+    /// </summary>
+    public static string? GetAntigravityExecutablePath() => GetAntigravityPath();
+
+
 
     private static string? GetAntigravityPath()
     {

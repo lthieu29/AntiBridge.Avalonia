@@ -154,17 +154,18 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
-        var quota = await _quotaService.FetchQuotaAsync(CurrentAccount.Token.AccessToken);
-        if (quota != null)
-        {
-            CurrentAccount.Quota = quota;
-            _accountStorage.UpdateAccountQuota(CurrentAccount.Id, quota);
-
-            ModelQuotas = quota.Models
-                .OrderByDescending(m => m.Percentage)
-                .Select(m => new ModelQuotaViewModel(m))
-                .ToList();
-        }
+        // [COMMENTED OUT] Quota check disabled
+        // var quota = await _quotaService.FetchQuotaAsync(CurrentAccount.Token.AccessToken);
+        // if (quota != null)
+        // {
+        //     CurrentAccount.Quota = quota;
+        //     _accountStorage.UpdateAccountQuota(CurrentAccount.Id, quota);
+        //
+        //     ModelQuotas = quota.Models
+        //         .OrderByDescending(m => m.Percentage)
+        //         .Select(m => new ModelQuotaViewModel(m))
+        //         .ToList();
+        // }
     }
 
     private async Task LoadSavedAccountsAsync()
@@ -284,24 +285,26 @@ public partial class MainViewModel : ObservableObject
                 }
             }
 
-            StatusMessage = "Fetching quota...";
-            var quota = await _quotaService.FetchQuotaAsync(CurrentAccount.Token.AccessToken);
-
-            if (quota == null)
-            {
-                ErrorMessage = "Failed to fetch quota";
-                return;
-            }
-
-            CurrentAccount.Quota = quota;
-
-            // Convert to view models for display
-            ModelQuotas = quota.Models
-                .OrderByDescending(m => m.Percentage)
-                .Select(m => new ModelQuotaViewModel(m))
-                .ToList();
-
-            StatusMessage = $"Updated {ModelQuotas.Count} models at {DateTime.Now:HH:mm:ss}";
+            // [COMMENTED OUT] Quota check disabled
+            // StatusMessage = "Fetching quota...";
+            // var quota = await _quotaService.FetchQuotaAsync(CurrentAccount.Token.AccessToken);
+            //
+            // if (quota == null)
+            // {
+            //     ErrorMessage = "Failed to fetch quota";
+            //     return;
+            // }
+            //
+            // CurrentAccount.Quota = quota;
+            //
+            // // Convert to view models for display
+            // ModelQuotas = quota.Models
+            //     .OrderByDescending(m => m.Percentage)
+            //     .Select(m => new ModelQuotaViewModel(m))
+            //     .ToList();
+            //
+            // StatusMessage = $"Updated {ModelQuotas.Count} models at {DateTime.Now:HH:mm:ss}";
+            StatusMessage = "Quota check skipped";
         }
         catch (Exception ex)
         {
@@ -352,15 +355,15 @@ public partial class MainViewModel : ObservableObject
                         }
                     }
 
-                    // Fetch quota
-                    var quota = await _quotaService.FetchQuotaAsync(token.AccessToken);
-                    if (quota != null)
-                    {
-                        _accountStorage.UpdateAccountQuota(account.Id, quota);
-                        account.Quota = quota;
-                        account.UpdateLastUsed();
-                        _accountStorage.UpsertAccount(account.Email, account.Name, account.Token);
-                    }
+                    // [COMMENTED OUT] Quota check disabled
+                    // var quota = await _quotaService.FetchQuotaAsync(token.AccessToken);
+                    // if (quota != null)
+                    // {
+                    //     _accountStorage.UpdateAccountQuota(account.Id, quota);
+                    //     account.Quota = quota;
+                    //     account.UpdateLastUsed();
+                    //     _accountStorage.UpsertAccount(account.Email, account.Name, account.Token);
+                    // }
                     count++;
                 }
                 catch { /* Continue with next account */ }
@@ -405,13 +408,14 @@ public partial class MainViewModel : ObservableObject
                 }
             }
 
-            var quota = await _quotaService.FetchQuotaAsync(token.AccessToken);
-            if (quota != null)
-            {
-                _accountStorage.UpdateAccountQuota(account.Id, quota);
-                account.UpdateLastUsed();
-                _accountStorage.UpsertAccount(account.Email, account.Name, token);
-            }
+            // [COMMENTED OUT] Quota check disabled
+            // var quota = await _quotaService.FetchQuotaAsync(token.AccessToken);
+            // if (quota != null)
+            // {
+            //     _accountStorage.UpdateAccountQuota(account.Id, quota);
+            //     account.UpdateLastUsed();
+            //     _accountStorage.UpsertAccount(account.Email, account.Name, token);
+            // }
 
             RefreshAccountList();
             StatusMessage = $"Refreshed {account.Email}";
