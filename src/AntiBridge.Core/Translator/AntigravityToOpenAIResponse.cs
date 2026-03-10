@@ -1,4 +1,6 @@
+using System.Text;
 using System.Text.Json.Nodes;
+using AntiBridge.Core.Services;
 
 namespace AntiBridge.Core.Translator;
 
@@ -9,20 +11,244 @@ public class OpenAIStreamState
 {
     public long UnixTimestamp { get; set; }
     public int FunctionIndex { get; set; }
+    
+    /// <summary>
+    /// Counter for generating unique tool call IDs within a session.
+    /// </summary>
+    public long ToolCallIdCounter { get; set; }
+    
+    /// <summary>
+    /// Accumulated reasoning content for the current response.
+    /// </summary>
+    public StringBuilder ReasoningContent { get; } = new();
 }
 
 /// <summary>
 /// Converts Antigravity API responses to OpenAI API format
-/// Ported from CLIProxyAPI/internal/translator/antigravity/openai/chat-completions/antigravity_openai_response.go
+/// Ported from Antigravity-Manager/src-tauri/src/proxy/mappers/openai/response.rs
 /// </summary>
 public static class AntigravityToOpenAIResponse
 {
-    private static long _functionCallIdCounter;
+    /// <summary>
+    /// Global counter for generating unique tool call IDs across sessions.
+    /// </summary>
+    private static long _globalToolCallIdCounter;
+
+    #region Task 11.5: Response Processing Fixes
 
     /// <summary>
-    /// Convert streaming response chunk
+    /// Decodes a Base64-encoded signature to UTF-8 string.
+    /// Task 11.5.3: Implement DecodeBase64Signature().
+    /// Ported from Claude translator.
     /// </summary>
-    public static List<string> ConvertStream(string modelName, byte[] rawJson, OpenAIStreamState state)
+    public static string DecodeBase64Signature(string? signature)
+    {
+        if (string.IsNullOrEmpty(signature))
+            return signature ?? "";
+
+        try
+        {
+            var decodedBytes = Convert.FromBase64String(signature);
+            var decodedString = Encoding.UTF8.GetString(decodedBytes);
+            
+            // Verify it's valid UTF-8 text
+            if (IsPrintableString(decodedString))
+            {
+                return decodedString;
+            }
+            
+            return signature;
+        }
+        catch
+        {
+            return signature;
+        }
+    }
+
+    private static bool IsPrintableString(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return false;
+        
+        int printableCount = 0;
+        foreach (var c in s)
+        {
+            if (char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsWhiteSpace(c) || char.IsSymbol(c))
+            {
+                printableCount++;
+            }
+        }
+        
+        return (double)printableCount / s.Length >= 0.8;
+    }
+
+    /// <summary>
+    /// Remaps function call arguments for Gemini → OpenAI compatibility.
+    /// Task 11.5.4: Implement RemapFunctionCallArgs().
+    /// Same as Claude translator.
+    /// </summary>
+    public static void RemapFunctionCallArgs(string toolName, JsonObject? args)
+    {
+        if (args == null || string.IsNullOrEmpty(toolName))
+            return;
+
+        var toolNameLower = toolName.ToLowerInvariant();
+
+        switch (toolNameLower)
+        {
+            case "grep":
+            case "search":
+            case "search_code_definitions":
+            case "search_code_snippets":
+                if (args.ContainsKey("description") && !args.ContainsKey("pattern"))
+                {
+                    args["pattern"] = args["description"]?.DeepClone();
+                    args.Remove("description");
+                }
+                if (args.ContainsKey("query") && !args.ContainsKey("pattern"))
+                {
+                    args["pattern"] = args["query"]?.DeepClone();
+                    args.Remove("query");
+                }
+                RemapPathsToPath(args);
+                break;
+
+            case "glob":
+                if (args.ContainsKey("description") && !args.ContainsKey("pattern"))
+                {
+                    args["pattern"] = args["description"]?.DeepClone();
+                    args.Remove("description");
+                }
+                if (args.ContainsKey("query") && !args.ContainsKey("pattern"))
+                {
+                    args["pattern"] = args["query"]?.DeepClone();
+                    args.Remove("query");
+                }
+                RemapPathsToPath(args);
+                break;
+
+            case "read":
+                if (args.ContainsKey("path") && !args.ContainsKey("file_path"))
+                {
+                    args["file_path"] = args["path"]?.DeepClone();
+                    args.Remove("path");
+                }
+                break;
+
+            case "ls":
+                if (!args.ContainsKey("path"))
+                {
+                    args["path"] = ".";
+                }
+                break;
+
+            case "enterplanmode":
+                var keys = args.Select(kvp => kvp.Key).ToList();
+                foreach (var key in keys)
+                {
+                    args.Remove(key);
+                }
+                break;
+
+            default:
+                RemapPathsToPath(args);
+                break;
+        }
+    }
+
+    private static void RemapPathsToPath(JsonObject args)
+    {
+        if (args.ContainsKey("path"))
+            return;
+
+        if (args.ContainsKey("paths"))
+        {
+            var paths = args["paths"];
+            string pathStr = ".";
+
+            if (paths is JsonArray pathsArray && pathsArray.Count > 0)
+            {
+                var firstPath = pathsArray[0];
+                if (firstPath is JsonValue pathVal)
+                {
+                    try { pathStr = pathVal.GetValue<string>(); }
+                    catch { }
+                }
+            }
+            else if (paths is JsonValue pVal)
+            {
+                try { pathStr = pVal.GetValue<string>(); }
+                catch { }
+            }
+
+            args["path"] = pathStr;
+            args.Remove("paths");
+        }
+        else
+        {
+            args["path"] = ".";
+        }
+    }
+
+    /// <summary>
+    /// Formats grounding metadata (web search results) as markdown citations.
+    /// Task 11.5.2: Implement grounding metadata handling.
+    /// Ported from Rust: groundingMetadata handling
+    /// </summary>
+    public static string FormatGroundingMetadata(JsonNode? grounding)
+    {
+        if (grounding == null) return "";
+
+        var result = new StringBuilder();
+
+        // Process search queries
+        var queries = JsonHelper.GetPath(grounding, "webSearchQueries") as JsonArray;
+        if (queries != null && queries.Count > 0)
+        {
+            var queryList = queries
+                .Select(q => q?.GetValue<string>())
+                .Where(q => !string.IsNullOrEmpty(q))
+                .ToList();
+            
+            if (queryList.Count > 0)
+            {
+                result.Append("\n\n---\n**🔍 Searched:** ");
+                result.Append(string.Join(", ", queryList));
+            }
+        }
+
+        // Process grounding chunks (citations)
+        var chunks = JsonHelper.GetPath(grounding, "groundingChunks") as JsonArray;
+        if (chunks != null && chunks.Count > 0)
+        {
+            var links = new List<string>();
+            for (int i = 0; i < chunks.Count; i++)
+            {
+                var chunk = chunks[i];
+                var web = JsonHelper.GetPath(chunk, "web");
+                if (web != null)
+                {
+                    var title = JsonHelper.GetString(web, "title") ?? "Source";
+                    var uri = JsonHelper.GetString(web, "uri") ?? "#";
+                    links.Add($"[{i + 1}] [{title}]({uri})");
+                }
+            }
+
+            if (links.Count > 0)
+            {
+                result.Append("\n\n**🌐 Sources:**\n");
+                result.Append(string.Join("\n", links));
+            }
+        }
+
+        return result.ToString();
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Convert streaming response chunk.
+    /// </summary>
+    public static List<string> ConvertStream(string modelName, byte[] rawJson, OpenAIStreamState state, ISignatureCache? signatureCache = null)
     {
         var results = new List<string>();
 
@@ -47,13 +273,7 @@ public static class AntigravityToOpenAIResponse
                 new JsonObject
                 {
                     ["index"] = 0,
-                    ["delta"] = new JsonObject
-                    {
-                        ["role"] = (JsonNode?)null,
-                        ["content"] = (JsonNode?)null,
-                        ["reasoning_content"] = (JsonNode?)null,
-                        ["tool_calls"] = (JsonNode?)null
-                    },
+                    ["delta"] = new JsonObject(),
                     ["finish_reason"] = (JsonNode?)null,
                     ["native_finish_reason"] = (JsonNode?)null
                 }
@@ -96,15 +316,18 @@ public static class AntigravityToOpenAIResponse
         if (usage != null)
         {
             var cachedTokens = JsonHelper.GetLong(usage, "cachedContentTokenCount") ?? 0;
-            var promptTokens = (JsonHelper.GetLong(usage, "promptTokenCount") ?? 0) - cachedTokens;
+            var promptTokens = JsonHelper.GetLong(usage, "promptTokenCount") ?? 0;
             var thoughtsTokens = JsonHelper.GetLong(usage, "thoughtsTokenCount") ?? 0;
             var candidatesTokens = JsonHelper.GetLong(usage, "candidatesTokenCount") ?? 0;
             var totalTokens = JsonHelper.GetLong(usage, "totalTokenCount") ?? 0;
 
+            var effectivePromptTokens = promptTokens - cachedTokens;
+            if (effectivePromptTokens < 0) effectivePromptTokens = 0;
+
             var usageObj = new JsonObject
             {
-                ["prompt_tokens"] = promptTokens + thoughtsTokens,
-                ["completion_tokens"] = candidatesTokens,
+                ["prompt_tokens"] = effectivePromptTokens,
+                ["completion_tokens"] = candidatesTokens + thoughtsTokens,
                 ["total_tokens"] = totalTokens
             };
 
@@ -130,18 +353,29 @@ public static class AntigravityToOpenAIResponse
         // Process parts
         var parts = JsonHelper.GetPath(root, "response.candidates.0.content.parts") as JsonArray;
         var hasFunctionCall = false;
+        var delta = ((template["choices"] as JsonArray)?[0] as JsonObject)?["delta"] as JsonObject;
 
-        if (parts != null)
+        if (parts != null && delta != null)
         {
-            var delta = ((template["choices"] as JsonArray)?[0] as JsonObject)?["delta"] as JsonObject;
-
             foreach (var part in parts)
             {
+                // Task 11.5.1: Capture and store thought signature
+                var thoughtSig = JsonHelper.GetString(part, "thoughtSignature") 
+                              ?? JsonHelper.GetString(part, "thought_signature");
+                if (!string.IsNullOrEmpty(thoughtSig))
+                {
+                    var decodedSig = DecodeBase64Signature(thoughtSig);
+                    OpenAIToAntigravityRequest.StoreGlobalThoughtSignature(decodedSig);
+                    
+                    if (signatureCache != null && state.ReasoningContent.Length > 0)
+                    {
+                        signatureCache.SetSignature(state.ReasoningContent.ToString(), decodedSig);
+                    }
+                }
+
                 var textResult = JsonHelper.GetPath(part, "text");
                 var functionCall = JsonHelper.GetPath(part, "functionCall");
                 var inlineData = JsonHelper.GetPath(part, "inlineData") ?? JsonHelper.GetPath(part, "inline_data");
-                var thoughtSig = JsonHelper.GetString(part, "thoughtSignature") 
-                              ?? JsonHelper.GetString(part, "thought_signature");
                 var isThought = JsonHelper.GetBool(part, "thought") ?? false;
 
                 // Skip signature-only parts
@@ -156,19 +390,20 @@ public static class AntigravityToOpenAIResponse
                     
                     if (isThought)
                     {
-                        delta!["reasoning_content"] = text;
+                        delta["reasoning_content"] = text;
+                        state.ReasoningContent.Append(text);
                     }
                     else
                     {
-                        delta!["content"] = text;
+                        delta["content"] = text;
                     }
-                    delta!["role"] = "assistant";
+                    delta["role"] = "assistant";
                 }
                 else if (functionCall != null)
                 {
                     hasFunctionCall = true;
                     
-                    var toolCalls = delta!["tool_calls"] as JsonArray;
+                    var toolCalls = delta["tool_calls"] as JsonArray;
                     if (toolCalls == null)
                     {
                         toolCalls = new JsonArray();
@@ -176,7 +411,9 @@ public static class AntigravityToOpenAIResponse
                     }
 
                     var fcName = JsonHelper.GetString(functionCall, "name") ?? "";
-                    var fcId = $"{fcName}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{Interlocked.Increment(ref _functionCallIdCounter)}";
+                    var uniqueId = Interlocked.Increment(ref _globalToolCallIdCounter);
+                    state.ToolCallIdCounter++;
+                    var fcId = $"call_{fcName}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}_{uniqueId}";
 
                     var fcObj = new JsonObject
                     {
@@ -190,9 +427,11 @@ public static class AntigravityToOpenAIResponse
                         }
                     };
 
-                    var fcArgs = JsonHelper.GetPath(functionCall, "args");
+                    var fcArgs = JsonHelper.GetPath(functionCall, "args")?.DeepClone() as JsonObject;
                     if (fcArgs != null)
                     {
+                        // Task 11.5.4: Remap function call args
+                        RemapFunctionCallArgs(fcName, fcArgs);
                         (fcObj["function"] as JsonObject)!["arguments"] = JsonHelper.Stringify(fcArgs);
                     }
 
@@ -211,7 +450,7 @@ public static class AntigravityToOpenAIResponse
 
                     var imageUrl = $"data:{mimeType};base64,{data}";
 
-                    var images = delta!["images"] as JsonArray;
+                    var images = delta["images"] as JsonArray;
                     if (images == null)
                     {
                         images = new JsonArray();
@@ -232,6 +471,18 @@ public static class AntigravityToOpenAIResponse
             }
         }
 
+        // Task 11.5.2: Handle grounding metadata
+        var grounding = JsonHelper.GetPath(root, "response.candidates.0.groundingMetadata");
+        if (grounding != null && delta != null)
+        {
+            var groundingText = FormatGroundingMetadata(grounding);
+            if (!string.IsNullOrEmpty(groundingText))
+            {
+                var existingContent = JsonHelper.GetString(delta, "content") ?? "";
+                delta["content"] = existingContent + groundingText;
+            }
+        }
+
         if (hasFunctionCall)
         {
             var choice = (template["choices"] as JsonArray)?[0] as JsonObject;
@@ -244,9 +495,9 @@ public static class AntigravityToOpenAIResponse
     }
 
     /// <summary>
-    /// Convert non-streaming response
+    /// Convert non-streaming response.
     /// </summary>
-    public static string ConvertNonStream(string modelName, byte[] rawJson)
+    public static string ConvertNonStream(string modelName, byte[] rawJson, ISignatureCache? signatureCache = null)
     {
         var root = JsonHelper.Parse(rawJson);
         if (root == null) return "{}";
@@ -261,11 +512,15 @@ public static class AntigravityToOpenAIResponse
                 return "{}";
         }
 
+        // Usage statistics
         var promptTokens = JsonHelper.GetLong(responseNode, "usageMetadata.promptTokenCount") ?? 0;
         var candidateTokens = JsonHelper.GetLong(responseNode, "usageMetadata.candidatesTokenCount") ?? 0;
         var thoughtTokens = JsonHelper.GetLong(responseNode, "usageMetadata.thoughtsTokenCount") ?? 0;
         var totalTokens = JsonHelper.GetLong(responseNode, "usageMetadata.totalTokenCount") ?? 0;
         var cachedTokens = JsonHelper.GetLong(responseNode, "usageMetadata.cachedContentTokenCount") ?? 0;
+
+        var effectivePromptTokens = promptTokens - cachedTokens;
+        if (effectivePromptTokens < 0) effectivePromptTokens = 0;
 
         var response = new JsonObject
         {
@@ -280,15 +535,14 @@ public static class AntigravityToOpenAIResponse
                     ["index"] = 0,
                     ["message"] = new JsonObject
                     {
-                        ["role"] = "assistant",
-                        ["content"] = (JsonNode?)null
+                        ["role"] = "assistant"
                     },
                     ["finish_reason"] = "stop"
                 }
             },
             ["usage"] = new JsonObject
             {
-                ["prompt_tokens"] = promptTokens - cachedTokens,
+                ["prompt_tokens"] = effectivePromptTokens,
                 ["completion_tokens"] = candidateTokens + thoughtTokens,
                 ["total_tokens"] = totalTokens
             }
@@ -313,25 +567,44 @@ public static class AntigravityToOpenAIResponse
         var message = ((response["choices"] as JsonArray)?[0] as JsonObject)?["message"] as JsonObject;
         var parts = JsonHelper.GetPath(responseNode, "candidates.0.content.parts") as JsonArray;
         
-        var textBuilder = new System.Text.StringBuilder();
-        var reasoningBuilder = new System.Text.StringBuilder();
+        var textBuilder = new StringBuilder();
+        var reasoningBuilder = new StringBuilder();
         var toolCalls = new JsonArray();
+        var images = new JsonArray();
         var hasToolCall = false;
-        var toolIdCounter = 0;
 
         if (parts != null)
         {
             foreach (var part in parts)
             {
+                // Task 11.5.1: Capture and store thought signature
+                var thoughtSig = JsonHelper.GetString(part, "thoughtSignature") 
+                              ?? JsonHelper.GetString(part, "thought_signature");
+                if (!string.IsNullOrEmpty(thoughtSig))
+                {
+                    var decodedSig = DecodeBase64Signature(thoughtSig);
+                    OpenAIToAntigravityRequest.StoreGlobalThoughtSignature(decodedSig);
+                }
+
                 var isThought = JsonHelper.GetBool(part, "thought") ?? false;
                 var text = JsonHelper.GetString(part, "text");
 
                 if (!string.IsNullOrEmpty(text))
                 {
                     if (isThought)
+                    {
                         reasoningBuilder.Append(text);
+                        
+                        // Store in signature cache if available
+                        if (signatureCache != null && !string.IsNullOrEmpty(thoughtSig))
+                        {
+                            signatureCache.SetSignature(text, DecodeBase64Signature(thoughtSig));
+                        }
+                    }
                     else
+                    {
                         textBuilder.Append(text);
+                    }
                     continue;
                 }
 
@@ -339,14 +612,22 @@ public static class AntigravityToOpenAIResponse
                 if (functionCall != null)
                 {
                     hasToolCall = true;
-                    toolIdCounter++;
 
                     var fcName = JsonHelper.GetString(functionCall, "name") ?? "";
-                    var fcArgs = JsonHelper.GetPath(functionCall, "args");
+                    var fcArgs = JsonHelper.GetPath(functionCall, "args")?.DeepClone() as JsonObject;
+                    
+                    // Task 11.5.4: Remap function call args
+                    if (fcArgs != null)
+                    {
+                        RemapFunctionCallArgs(fcName, fcArgs);
+                    }
+                    
+                    var uniqueId = Interlocked.Increment(ref _globalToolCallIdCounter);
+                    var fcId = $"call_{fcName}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}_{uniqueId}";
 
                     toolCalls.Add(new JsonObject
                     {
-                        ["id"] = $"call_{toolIdCounter}",
+                        ["id"] = fcId,
                         ["type"] = "function",
                         ["function"] = new JsonObject
                         {
@@ -354,6 +635,7 @@ public static class AntigravityToOpenAIResponse
                             ["arguments"] = fcArgs != null ? JsonHelper.Stringify(fcArgs) : "{}"
                         }
                     });
+                    continue;
                 }
 
                 var inlineData = JsonHelper.GetPath(part, "inlineData") ?? JsonHelper.GetPath(part, "inline_data");
@@ -365,26 +647,54 @@ public static class AntigravityToOpenAIResponse
                         var mimeType = JsonHelper.GetString(inlineData, "mimeType") 
                                     ?? JsonHelper.GetString(inlineData, "mime_type") 
                                     ?? "image/png";
-                        // For non-streaming, we could add image to content array
-                        // but OpenAI format typically uses text content
+                        
+                        var imageUrl = $"data:{mimeType};base64,{data}";
+                        
+                        images.Add(new JsonObject
+                        {
+                            ["type"] = "image_url",
+                            ["index"] = images.Count,
+                            ["image_url"] = new JsonObject
+                            {
+                                ["url"] = imageUrl
+                            }
+                        });
                     }
                 }
             }
         }
 
+        // Task 11.5.2: Handle grounding metadata
+        var grounding = JsonHelper.GetPath(responseNode, "candidates.0.groundingMetadata");
+        if (grounding != null)
+        {
+            var groundingText = FormatGroundingMetadata(grounding);
+            if (!string.IsNullOrEmpty(groundingText))
+            {
+                textBuilder.Append(groundingText);
+            }
+        }
+
+        // Set content
         if (textBuilder.Length > 0)
         {
             message!["content"] = textBuilder.ToString();
         }
-
-        if (reasoningBuilder.Length > 0)
+        else
         {
-            message!["reasoning_content"] = reasoningBuilder.ToString();
+            message!["content"] = (JsonNode?)null;
         }
 
+        // Set reasoning_content
+        if (reasoningBuilder.Length > 0)
+        {
+            message["reasoning_content"] = reasoningBuilder.ToString();
+        }
+
+        // Set tool_calls
         if (hasToolCall)
         {
-            message!["tool_calls"] = toolCalls;
+            message["tool_calls"] = toolCalls;
             var choice = (response["choices"] as JsonArray)?[0] as JsonObject;
             choice!["finish_reason"] = "tool_calls";
         }
@@ -398,6 +708,12 @@ public static class AntigravityToOpenAIResponse
                 "stop" => "stop",
                 _ => "stop"
             };
+        }
+
+        // Set images if present
+        if (images.Count > 0)
+        {
+            message["images"] = images;
         }
 
         return JsonHelper.Stringify(response);

@@ -1,0 +1,25 @@
+# Maintainer: Antigravity Team <https://github.com/lbjlaq/Antigravity-Manager>
+pkgname=antigravity-tools-bin
+pkgver=${_pkgver}
+pkgrel=1
+pkgdesc="Professional AI Account Management & Proxy System (Binary Version)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/lbjlaq/Antigravity-Manager"
+license=('CC-BY-NC-SA-4.0')
+depends=('gtk3' 'libappindicator-gtk3' 'openssl' 'webkit2gtk-4.1' 'libnm' 'xdg-utils' 'librsvg')
+provides=('antigravity-tools')
+conflicts=('antigravity-tools')
+options=('!strip' '!debug')
+
+source_x86_64=("${pkgname}-${pkgver}-x86_64.deb::${_url_x86_64}")
+source_aarch64=("${pkgname}-${pkgver}-aarch64.deb::${_url_aarch64}")
+sha256sums_x86_64=("${_sha256_x86_64}")
+sha256sums_aarch64=("${_sha256_aarch64}")
+
+package() {
+  # Extract the data.tar.zst from the deb package
+  tar -xf data.tar.zst -C "${pkgdir}"
+  
+  # Fix permissions if necessary
+  chmod -R 755 "${pkgdir}/usr/bin"
+}

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -18,8 +19,20 @@ public class ProxyServer : IDisposable
     private readonly ProxyConfig _config;
     private readonly ISignatureCache? _signatureCache;
     private readonly ILoadBalancer? _loadBalancer;
+    private readonly IModelRouter? _modelRouter;
+    private readonly TrafficMonitor? _trafficMonitor;
     private CancellationTokenSource? _cts;
     private Task? _serverTask;
+
+    /// <summary>
+    /// Default max tokens for Flash models (1M tokens)
+    /// </summary>
+    private const int FlashMaxTokens = 1_000_000;
+
+    /// <summary>
+    /// Default max tokens for Pro models (2M tokens)
+    /// </summary>
+    private const int ProMaxTokens = 2_000_000;
 
     public bool IsRunning { get; private set; }
     public string BaseUrl => $"http://{_config.Host}:{_config.Port}";
@@ -33,13 +46,17 @@ public class ProxyServer : IDisposable
         AccountStorageService accountStorage,
         ProxyConfig? config = null,
         ISignatureCache? signatureCache = null,
-        ILoadBalancer? loadBalancer = null)
+        ILoadBalancer? loadBalancer = null,
+        IModelRouter? modelRouter = null,
+        TrafficMonitor? trafficMonitor = null)
     {
         _executor = executor;
         _accountStorage = accountStorage;
         _config = config ?? new ProxyConfig();
         _signatureCache = signatureCache;
         _loadBalancer = loadBalancer;
+        _modelRouter = modelRouter;
+        _trafficMonitor = trafficMonitor;
         _listener = new HttpListener();
         
         _executor.OnLog += msg => OnLog?.Invoke($"[Executor] {msg}");
@@ -242,35 +259,111 @@ public class ProxyServer : IDisposable
 
     private async Task HandleOpenAIChatCompletionsAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
     {
-        var account = GetActiveAccount();
-        if (account == null)
+        var stopwatch = Stopwatch.StartNew();
+        TrafficLog? trafficLog = null;
+        Account? account = null;
+        string? originalModel = null;
+        string? mappedModel = null;
+        bool compressionApplied = false;
+
+        try
         {
-            response.StatusCode = 401;
-            await WriteJsonResponseAsync(response, new { error = new { message = "No active account" } });
-            return;
+            account = GetActiveAccount();
+            if (account == null)
+            {
+                response.StatusCode = 401;
+                await WriteJsonResponseAsync(response, new { error = new { message = "No active account" } });
+                return;
+            }
+
+            var body = await ReadRequestBodyAsync(request);
+            var requestNode = JsonHelper.Parse(body);
+            if (requestNode == null)
+            {
+                response.StatusCode = 400;
+                await WriteJsonResponseAsync(response, new { error = new { message = "Invalid JSON" } });
+                return;
+            }
+
+            originalModel = JsonHelper.GetString(requestNode, "model") ?? _config.DefaultModel ?? "gemini-2.5-pro";
+            var stream = JsonHelper.GetBool(requestNode, "stream") ?? false;
+
+            // Apply model routing (Task 8.1)
+            mappedModel = _modelRouter?.ResolveModel(originalModel) ?? originalModel;
+            OnLog?.Invoke($"OpenAI request: model={originalModel} -> {mappedModel}, stream={stream}");
+
+            // Update the model in the request
+            if (requestNode is JsonObject requestObj)
+            {
+                requestObj["model"] = mappedModel;
+            }
+
+            // Apply context compression (Task 8.3)
+            var maxTokens = GetMaxTokensForModel(mappedModel);
+            var compressionResult = ContextManager.ApplyProgressiveCompression(requestNode, maxTokens);
+            compressionApplied = compressionResult.WasCompressed;
+            if (compressionApplied)
+            {
+                OnLog?.Invoke($"Context compression applied: layers={string.Join(",", compressionResult.LayersApplied)}, pressure={compressionResult.FinalPressure}%");
+                response.Headers.Add("X-Context-Purified", "true");
+            }
+
+            // Apply device profile headers (Task 8.4)
+            ApplyDeviceProfileHeaders(account, request);
+
+            // Create traffic log at request start (Task 8.2)
+            trafficLog = new TrafficLog
+            {
+                Method = request.HttpMethod,
+                Url = request.Url?.AbsolutePath ?? "",
+                Model = originalModel,
+                MappedModel = mappedModel,
+                AccountEmail = account.Email,
+                Protocol = "openai",
+                RequestBody = TruncateBody(Encoding.UTF8.GetString(body))
+            };
+
+            // Re-serialize the modified request
+            body = Encoding.UTF8.GetBytes(JsonHelper.Stringify(requestNode) ?? "{}");
+
+            if (stream)
+            {
+                await HandleOpenAIStreamAsync(account, mappedModel, body, response, cancellationToken);
+            }
+            else
+            {
+                await HandleOpenAINonStreamAsync(account, mappedModel, body, response, cancellationToken);
+            }
+
+            // Update traffic log with success
+            if (trafficLog != null)
+            {
+                trafficLog.Status = 200;
+            }
         }
-
-        var body = await ReadRequestBodyAsync(request);
-        var requestNode = JsonHelper.Parse(body);
-        if (requestNode == null)
+        catch (Exception ex)
         {
-            response.StatusCode = 400;
-            await WriteJsonResponseAsync(response, new { error = new { message = "Invalid JSON" } });
-            return;
+            OnError?.Invoke($"OpenAI request error: {ex.Message}");
+            response.StatusCode = 500;
+            await WriteJsonResponseAsync(response, new { error = new { message = ex.Message } });
+
+            // Update traffic log with error
+            if (trafficLog != null)
+            {
+                trafficLog.Status = 500;
+                trafficLog.Error = ex.Message;
+            }
         }
-
-        var modelName = JsonHelper.GetString(requestNode, "model") ?? _config.DefaultModel ?? "gemini-2.5-pro";
-        var stream = JsonHelper.GetBool(requestNode, "stream") ?? false;
-
-        OnLog?.Invoke($"OpenAI request: model={modelName}, stream={stream}");
-
-        if (stream)
+        finally
         {
-            await HandleOpenAIStreamAsync(account, modelName, body, response, cancellationToken);
-        }
-        else
-        {
-            await HandleOpenAINonStreamAsync(account, modelName, body, response, cancellationToken);
+            stopwatch.Stop();
+
+            // Log request in finally block (Task 8.2.4)
+            if (trafficLog != null)
+            {
+                trafficLog.DurationMs = stopwatch.ElapsedMilliseconds;
+                _trafficMonitor?.LogRequest(trafficLog);
+            }
         }
     }
 
@@ -311,35 +404,111 @@ public class ProxyServer : IDisposable
 
     private async Task HandleClaudeMessagesAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
     {
-        var account = GetActiveAccount();
-        if (account == null)
+        var stopwatch = Stopwatch.StartNew();
+        TrafficLog? trafficLog = null;
+        Account? account = null;
+        string? originalModel = null;
+        string? mappedModel = null;
+        bool compressionApplied = false;
+
+        try
         {
-            response.StatusCode = 401;
-            await WriteJsonResponseAsync(response, new { type = "error", error = new { type = "authentication_error", message = "No active account" } });
-            return;
+            account = GetActiveAccount();
+            if (account == null)
+            {
+                response.StatusCode = 401;
+                await WriteJsonResponseAsync(response, new { type = "error", error = new { type = "authentication_error", message = "No active account" } });
+                return;
+            }
+
+            var body = await ReadRequestBodyAsync(request);
+            var requestNode = JsonHelper.Parse(body);
+            if (requestNode == null)
+            {
+                response.StatusCode = 400;
+                await WriteJsonResponseAsync(response, new { type = "error", error = new { type = "invalid_request_error", message = "Invalid JSON" } });
+                return;
+            }
+
+            originalModel = JsonHelper.GetString(requestNode, "model") ?? _config.DefaultModel ?? "claude-sonnet-4-20250514";
+            var stream = JsonHelper.GetBool(requestNode, "stream") ?? false;
+
+            // Apply model routing (Task 8.1)
+            mappedModel = _modelRouter?.ResolveModel(originalModel) ?? originalModel;
+            OnLog?.Invoke($"Claude request: model={originalModel} -> {mappedModel}, stream={stream}");
+
+            // Update the model in the request
+            if (requestNode is JsonObject requestObj)
+            {
+                requestObj["model"] = mappedModel;
+            }
+
+            // Apply context compression (Task 8.3)
+            var maxTokens = GetMaxTokensForModel(mappedModel);
+            var compressionResult = ContextManager.ApplyProgressiveCompression(requestNode, maxTokens);
+            compressionApplied = compressionResult.WasCompressed;
+            if (compressionApplied)
+            {
+                OnLog?.Invoke($"Context compression applied: layers={string.Join(",", compressionResult.LayersApplied)}, pressure={compressionResult.FinalPressure}%");
+                response.Headers.Add("X-Context-Purified", "true");
+            }
+
+            // Apply device profile headers (Task 8.4)
+            ApplyDeviceProfileHeaders(account, request);
+
+            // Create traffic log at request start (Task 8.2)
+            trafficLog = new TrafficLog
+            {
+                Method = request.HttpMethod,
+                Url = request.Url?.AbsolutePath ?? "",
+                Model = originalModel,
+                MappedModel = mappedModel,
+                AccountEmail = account.Email,
+                Protocol = "anthropic",
+                RequestBody = TruncateBody(Encoding.UTF8.GetString(body))
+            };
+
+            // Re-serialize the modified request
+            body = Encoding.UTF8.GetBytes(JsonHelper.Stringify(requestNode) ?? "{}");
+
+            if (stream)
+            {
+                await HandleClaudeStreamAsync(account, mappedModel, body, response, cancellationToken);
+            }
+            else
+            {
+                await HandleClaudeNonStreamAsync(account, mappedModel, body, response, cancellationToken);
+            }
+
+            // Update traffic log with success
+            if (trafficLog != null)
+            {
+                trafficLog.Status = 200;
+            }
         }
-
-        var body = await ReadRequestBodyAsync(request);
-        var requestNode = JsonHelper.Parse(body);
-        if (requestNode == null)
+        catch (Exception ex)
         {
-            response.StatusCode = 400;
-            await WriteJsonResponseAsync(response, new { type = "error", error = new { type = "invalid_request_error", message = "Invalid JSON" } });
-            return;
+            OnError?.Invoke($"Claude request error: {ex.Message}");
+            response.StatusCode = 500;
+            await WriteJsonResponseAsync(response, new { type = "error", error = new { type = "api_error", message = ex.Message } });
+
+            // Update traffic log with error
+            if (trafficLog != null)
+            {
+                trafficLog.Status = 500;
+                trafficLog.Error = ex.Message;
+            }
         }
-
-        var modelName = JsonHelper.GetString(requestNode, "model") ?? _config.DefaultModel ?? "claude-sonnet-4-20250514";
-        var stream = JsonHelper.GetBool(requestNode, "stream") ?? false;
-
-        OnLog?.Invoke($"Claude request: model={modelName}, stream={stream}");
-
-        if (stream)
+        finally
         {
-            await HandleClaudeStreamAsync(account, modelName, body, response, cancellationToken);
-        }
-        else
-        {
-            await HandleClaudeNonStreamAsync(account, modelName, body, response, cancellationToken);
+            stopwatch.Stop();
+
+            // Log request in finally block (Task 8.2.4)
+            if (trafficLog != null)
+            {
+                trafficLog.DurationMs = stopwatch.ElapsedMilliseconds;
+                _trafficMonitor?.LogRequest(trafficLog);
+            }
         }
     }
 
@@ -433,6 +602,70 @@ public class ProxyServer : IDisposable
         var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = false });
         var bytes = Encoding.UTF8.GetBytes(json);
         await response.OutputStream.WriteAsync(bytes);
+    }
+
+    /// <summary>
+    /// Get the maximum token limit for a model.
+    /// Flash models: 1M tokens, Pro models: 2M tokens.
+    /// </summary>
+    /// <param name="modelName">The model name to check.</param>
+    /// <returns>Maximum token limit for the model.</returns>
+    private static int GetMaxTokensForModel(string modelName)
+    {
+        if (string.IsNullOrEmpty(modelName))
+            return FlashMaxTokens;
+
+        // Pro models have 2M token limit
+        if (modelName.Contains("pro", StringComparison.OrdinalIgnoreCase))
+            return ProMaxTokens;
+
+        // Flash and other models have 1M token limit
+        return FlashMaxTokens;
+    }
+
+    /// <summary>
+    /// Apply device profile headers to the request.
+    /// Falls back to system defaults when no profile is set.
+    /// </summary>
+    /// <param name="account">The account to get device profile from.</param>
+    /// <param name="request">The HTTP request (for potential header modification).</param>
+    private void ApplyDeviceProfileHeaders(Account account, HttpListenerRequest request)
+    {
+        var profile = account.DeviceProfile;
+        
+        if (profile != null)
+        {
+            // Log that we're using the account's device profile
+            OnLog?.Invoke($"Using device profile: version={profile.Version}, machine_id={profile.MachineId[..8]}...");
+            
+            // The device profile headers would be applied to outgoing requests to Antigravity
+            // This is handled by the executor, but we log it here for visibility
+            _executor.SetDeviceProfile(profile);
+        }
+        else
+        {
+            // Fall back to system defaults (no custom profile)
+            OnLog?.Invoke("Using system default device identifiers");
+            _executor.SetDeviceProfile(null);
+        }
+    }
+
+    /// <summary>
+    /// Truncate request/response body for logging.
+    /// Limits to 10KB to prevent excessive storage.
+    /// </summary>
+    /// <param name="body">The body string to truncate.</param>
+    /// <returns>Truncated body string.</returns>
+    private static string? TruncateBody(string? body)
+    {
+        if (string.IsNullOrEmpty(body))
+            return body;
+
+        const int maxLength = 10 * 1024; // 10KB
+        if (body.Length <= maxLength)
+            return body;
+
+        return body[..maxLength] + "...[truncated]";
     }
 
     public void Dispose()

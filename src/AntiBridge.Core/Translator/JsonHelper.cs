@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 
 namespace AntiBridge.Core.Translator;
 
@@ -11,7 +12,8 @@ public static class JsonHelper
     private static readonly JsonSerializerOptions Options = new()
     {
         PropertyNamingPolicy = null,
-        WriteIndented = false
+        WriteIndented = false,
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver()
     };
 
     /// <summary>
@@ -322,4 +324,150 @@ public static class JsonHelper
     /// Get object from node
     /// </summary>
     public static JsonObject? AsObject(JsonNode? node) => node as JsonObject;
+
+    /// <summary>
+    /// Recursively removes all "cache_control" fields from a JSON structure.
+    /// This is necessary because VS Code and other clients may send back historical messages
+    /// with cache_control fields that the Anthropic API does not accept.
+    /// Ported from Rust: deep_clean_cache_control()
+    /// </summary>
+    /// <param name="node">The JSON node to clean</param>
+    /// <returns>The number of cache_control fields removed</returns>
+    public static int DeepCleanCacheControl(JsonNode? node)
+    {
+        if (node == null) return 0;
+
+        int removed = 0;
+
+        if (node is JsonObject obj)
+        {
+            // Remove cache_control from this object
+            if (obj.Remove("cache_control"))
+            {
+                removed++;
+            }
+
+            // Recursively clean all child values
+            // We need to iterate over a copy of keys since we're modifying during iteration
+            var keys = obj.Select(kvp => kvp.Key).ToList();
+            foreach (var key in keys)
+            {
+                var child = obj[key];
+                if (child != null)
+                {
+                    removed += DeepCleanCacheControl(child);
+                }
+            }
+        }
+        else if (node is JsonArray arr)
+        {
+            // Recursively clean all array elements
+            foreach (var item in arr)
+            {
+                removed += DeepCleanCacheControl(item);
+            }
+        }
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Recursively removes all "[undefined]" string values from a JSON structure.
+    /// This handles a common issue where clients like Cherry Studio inject "[undefined]" strings.
+    /// Ported from Rust: deep_clean_undefined()
+    /// </summary>
+    /// <param name="node">The JSON node to clean</param>
+    /// <returns>The number of "[undefined]" values removed or replaced</returns>
+    public static int DeepCleanUndefined(JsonNode? node)
+    {
+        if (node == null) return 0;
+
+        int cleaned = 0;
+
+        if (node is JsonObject obj)
+        {
+            // Find keys with "[undefined]" values
+            var keysToRemove = new List<string>();
+            var keysToRecurse = new List<string>();
+
+            foreach (var kvp in obj)
+            {
+                if (kvp.Value is JsonValue val)
+                {
+                    try
+                    {
+                        var strVal = val.GetValue<string>();
+                        if (strVal == "[undefined]")
+                        {
+                            keysToRemove.Add(kvp.Key);
+                        }
+                    }
+                    catch
+                    {
+                        // Not a string value, skip
+                    }
+                }
+                else if (kvp.Value != null)
+                {
+                    keysToRecurse.Add(kvp.Key);
+                }
+            }
+
+            // Remove keys with "[undefined]" values
+            foreach (var key in keysToRemove)
+            {
+                obj.Remove(key);
+                cleaned++;
+            }
+
+            // Recursively clean child objects/arrays
+            foreach (var key in keysToRecurse)
+            {
+                var child = obj[key];
+                if (child != null)
+                {
+                    cleaned += DeepCleanUndefined(child);
+                }
+            }
+        }
+        else if (node is JsonArray arr)
+        {
+            // Find indices with "[undefined]" values (remove in reverse order)
+            var indicesToRemove = new List<int>();
+
+            for (int i = 0; i < arr.Count; i++)
+            {
+                var item = arr[i];
+                if (item is JsonValue val)
+                {
+                    try
+                    {
+                        var strVal = val.GetValue<string>();
+                        if (strVal == "[undefined]")
+                        {
+                            indicesToRemove.Add(i);
+                        }
+                    }
+                    catch
+                    {
+                        // Not a string value, recurse
+                        cleaned += DeepCleanUndefined(item);
+                    }
+                }
+                else if (item != null)
+                {
+                    cleaned += DeepCleanUndefined(item);
+                }
+            }
+
+            // Remove in reverse order to preserve indices
+            for (int i = indicesToRemove.Count - 1; i >= 0; i--)
+            {
+                arr.RemoveAt(indicesToRemove[i]);
+                cleaned++;
+            }
+        }
+
+        return cleaned;
+    }
 }
