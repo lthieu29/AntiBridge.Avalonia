@@ -45,3 +45,9 @@ __pycache__/
 venv/
 
 .vs
+
+# Subtitle Translator (Bridge Server)
+subtitle-translator/bridge-server/node_modules/
+subtitle-translator/bridge-server/.env
+subtitle-translator/bridge-server/cache/
+subtitle-translator/bridge-server/logs/

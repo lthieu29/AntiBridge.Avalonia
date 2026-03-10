@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtitle Translator</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <h1 class="title">🎬 Subtitle Translator</h1>
+
+        <!-- Status -->
+        <div class="status-section">
+            <div class="status-item">
+                <span class="status-dot" id="bridgeStatus"></span>
+                <span id="bridgeLabel">Bridge Server</span>
+            </div>
+            <div class="status-item">
+                <span class="status-dot" id="vttStatus"></span>
+                <span id="vttLabel">VTT chưa phát hiện</span>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-section" id="progressSection" style="display: none;">
+            <div class="progress-label" id="progressLabel">Đang dịch...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" id="translateBtn" disabled>
+                🌐 Dịch Phụ Đề
+            </button>
+            <button class="btn btn-secondary" id="toggleBtn" disabled>
+                👁️ Bật/Tắt
+            </button>
+        </div>
+
+        <!-- Info -->
+        <div class="info" id="infoText"></div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
