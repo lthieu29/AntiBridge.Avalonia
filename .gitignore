@@ -16,6 +16,8 @@ Antigravity-Manager/src-tauri/target/
 Antigravity-Manager/src-tauri/gen/
 Antigravity-Manager/src-tauri/.env
 
+Antigravity-Manager/*
+
 # Logs
 *.log
 npm-debug.log*
@@ -41,3 +43,5 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+.vs
