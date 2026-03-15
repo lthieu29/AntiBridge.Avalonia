@@ -716,6 +716,16 @@ function attachToVideo() {
 
     // Reposition khi fullscreen/resize — LUÔN LUÔN (overlay follow video)
     document.addEventListener('fullscreenchange', () => {
+        if (overlayElement) {
+            const fsElement = document.fullscreenElement;
+            if (fsElement) {
+                // Entering fullscreen → move overlay vào fullscreen element
+                fsElement.appendChild(overlayElement);
+            } else {
+                // Exiting fullscreen → move overlay về body
+                document.body.appendChild(overlayElement);
+            }
+        }
         setTimeout(positionOverlay, 300);
     });
     window.addEventListener('resize', () => {
@@ -1114,27 +1124,31 @@ observer.observe(document.body, { childList: true, subtree: true });
 let lastUrl = window.location.href;
 
 /**
- * Phát hiện Udemy SPA navigation → auto-load phụ đề Tiếng Anh
+ * Phát hiện Udemy SPA navigation — MutationObserver + polling fallback
+ * (monkey-patch history không work vì content script chạy trong isolated world)
  */
 function watchUrlChanges() {
-    // Monkey-patch History API
-    const origPushState = history.pushState;
-    const origReplaceState = history.replaceState;
+    const check = () => {
+        if (location.href !== lastUrl) {
+            lastUrl = location.href;
+            onUrlChange();
+        }
+    };
 
-    history.pushState = function (...args) {
-        origPushState.apply(this, args);
-        onUrlChange();
-    };
-    history.replaceState = function (...args) {
-        origReplaceState.apply(this, args);
-        onUrlChange();
-    };
+    // MutationObserver: DOM thay đổi → check URL (bắt nhanh nhất)
+    new MutationObserver(check).observe(document.body, {
+        subtree: true, childList: true,
+    });
+
+    // Polling 500ms: fallback đáng tin cậy
+    setInterval(check, 500);
 
     // Back/forward
-    window.addEventListener('popstate', () => onUrlChange());
+    window.addEventListener('popstate', check);
 }
 
 function onUrlChange() {
+    console.log('urlChange');
     const newUrl = window.location.href;
     if (newUrl === lastUrl) return;
 
