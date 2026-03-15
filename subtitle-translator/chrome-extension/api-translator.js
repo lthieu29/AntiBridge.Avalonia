@@ -198,12 +198,98 @@ function reconstructVtt(header, cues, translations) {
     return result.trim() + '\n';
 }
 
-// Export for background script (ES module style won't work in service worker, so use global)
-// These will be called via importScripts or inline
+// ==================== OPENAI-COMPATIBLE TRANSLATOR ====================
+
+/**
+ * Dịch VTT qua OpenAI-compatible API (dunremote, etc.)
+ */
+async function translateVttViaOpenAi(vttContent, settings, onProgress) {
+    const { openaiUrl, openaiKey, chunkSize = 20 } = settings;
+
+    if (!openaiUrl) throw new Error('OpenAI URL chưa được cấu hình');
+
+    const { cues, header } = parseVttSimple(vttContent);
+    if (cues.length === 0) throw new Error('Không tìm thấy cue nào trong VTT');
+
+    const chunks = [];
+    for (let i = 0; i < cues.length; i += chunkSize) {
+        chunks.push(cues.slice(i, i + chunkSize));
+    }
+
+    const allTranslations = new Map();
+
+    for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        const progress = {
+            chunk: i + 1,
+            total: chunks.length,
+            percent: Math.round(((i + 1) / chunks.length) * 100),
+        };
+        onProgress?.(progress);
+
+        const numberedLines = chunk
+            .map((cue, idx) => `${idx + 1}. ${cue.text}`)
+            .join('\n');
+        const prompt = `Dịch ${chunk.length} phụ đề sau sang tiếng Việt. Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích.\n${numberedLines}`;
+
+        const response = await callOpenAiCompatible(openaiUrl, openaiKey, prompt);
+
+        const translations = parseNumberedResponse(response, chunk.length);
+
+        for (let j = 0; j < chunk.length; j++) {
+            const promptIdx = j + 1;
+            if (translations.has(promptIdx)) {
+                allTranslations.set(chunk[j].index, translations.get(promptIdx));
+            }
+        }
+
+        if (i < chunks.length - 1) {
+            await new Promise(r => setTimeout(r, 300));
+        }
+    }
+
+    return reconstructVtt(header, cues, allTranslations);
+}
+
+/**
+ * Gọi OpenAI-compatible /v1/chat/completions
+ */
+async function callOpenAiCompatible(baseUrl, apiKey, prompt) {
+    const url = baseUrl.replace(/\/$/, '') + '/v1/chat/completions';
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+            model: 'deepseek/deepseek-v3.2',
+            messages: [{ role: 'user', content: prompt }],
+            stream: false,
+        }),
+    });
+
+    if (!res.ok) {
+        const errText = await res.text().catch(() => 'Unknown error');
+        if (res.status === 401) throw new Error('API Key không hợp lệ');
+        if (res.status === 429) throw new Error('Rate limited — chờ vài giây');
+        throw new Error(`OpenAI API error ${res.status}: ${errText.substring(0, 200)}`);
+    }
+
+    const data = await res.json();
+    const content = data?.choices?.[0]?.message?.content;
+    if (!content) throw new Error('Response không có content');
+    return content;
+}
+
+// Export for background script
 if (typeof globalThis !== 'undefined') {
     globalThis.ApiTranslator = {
         translateVttViaApi,
+        translateVttViaOpenAi,
         callOneminApi,
+        callOpenAiCompatible,
         parseNumberedResponse,
         parseVttSimple,
         reconstructVtt,

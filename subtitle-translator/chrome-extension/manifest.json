@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Udemy Subtitle Translator",
     "description": "Dịch phụ đề Udemy sang tiếng Việt qua Antigravity",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "permissions": [
         "webRequest",
         "storage",
@@ -13,7 +13,8 @@
         "*://*.udemycdn.com/*",
         "*://api.1min.ai/*",
         "http://localhost:3000/*",
-        "http://127.0.0.1:3000/*"
+        "http://127.0.0.1:3000/*",
+        "http://dunremote.fastddns.org:10100/*"
     ],
     "background": {
         "service_worker": "background.js"

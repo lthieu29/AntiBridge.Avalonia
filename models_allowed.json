@@ -1,0 +1,3305 @@
+{
+    "count": 147,
+    "data": [
+        {
+            "benchmark": {
+                "coding": 3.6,
+                "intelligence": 10.5,
+                "speed": 237.637
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2026-02-25",
+            "description": "A 24B-parameter Mixture-of-Experts model from LiquidAI with 2B active parameters per token, designed for efficient high-quality generation and practical local deployment.",
+            "formattedInputRate": "$0.03",
+            "formattedOutputRate": "$0.12",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "liquid/lfm-2-24b-a2b",
+            "inputRate": 0.030000000000000002,
+            "maxInputTokens": 32768,
+            "maxOutputTokens": 32768,
+            "name": "LFM2 24B A2B",
+            "outputRate": 0.12000000000000001,
+            "provider": "other"
+        },
+        {
+            "benchmark": {
+                "coding": 37.4,
+                "intelligence": 40.1,
+                "speed": 56.121
+            },
+            "capabilities": [
+                "vision",
+                "video-input"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-24",
+            "description": "Qwen3.5 122B A10B is Alibaba's high-end native vision-language model in the Qwen 3.5 family with strong text and multimodal performance.",
+            "formattedInputRate": "$0.36",
+            "formattedOutputRate": "$2.88",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen3.5-122b-a10b",
+            "inputRate": 0.36000000000000004,
+            "maxInputTokens": 260096,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3.5 122B A10B",
+            "outputRate": 2.8800000000000003,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 24.5,
+                "intelligence": 32.5,
+                "speed": 38.573
+            },
+            "capabilities": [
+                "reasoning",
+                "vision",
+                "video-input"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-24",
+            "description": "Qwen3.5 122B A10B with extended reasoning enabled. Alibaba's high-end native vision-language model in the Qwen 3.5 family.",
+            "formattedInputRate": "$0.36",
+            "formattedOutputRate": "$2.88",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen3.5-122b-a10b:thinking",
+            "inputRate": 0.36000000000000004,
+            "maxInputTokens": 260096,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3.5 122B A10B Thinking",
+            "outputRate": 2.8800000000000003,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 37.4,
+                "intelligence": 40.1,
+                "speed": 56.121
+            },
+            "capabilities": [
+                "vision",
+                "video-input"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-24",
+            "description": "Qwen3.5 27B is a native vision-language dense model optimized for fast responses while balancing quality and inference speed.",
+            "formattedInputRate": "$0.27",
+            "formattedOutputRate": "$2.16",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen3.5-27b",
+            "inputRate": 0.27,
+            "maxInputTokens": 260096,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3.5 27B",
+            "outputRate": 2.16,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 24.5,
+                "intelligence": 32.5,
+                "speed": 38.573
+            },
+            "capabilities": [
+                "reasoning",
+                "vision",
+                "video-input"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-24",
+            "description": "Qwen3.5 27B with extended reasoning enabled. A native vision-language dense model optimized for fast responses.",
+            "formattedInputRate": "$0.27",
+            "formattedOutputRate": "$2.16",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen3.5-27b:thinking",
+            "inputRate": 0.27,
+            "maxInputTokens": 260096,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3.5 27B Thinking",
+            "outputRate": 2.16,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 37.4,
+                "intelligence": 40.1,
+                "speed": 56.121
+            },
+            "capabilities": [
+                "vision",
+                "video-input"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-24",
+            "description": "Qwen3.5 35B A3B is a native vision-language MoE model with hybrid attention designed for efficient inference and strong general performance.",
+            "formattedInputRate": "$0.22",
+            "formattedOutputRate": "$1.80",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen3.5-35b-a3b",
+            "inputRate": 0.22499999999999998,
+            "maxInputTokens": 260096,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3.5 35B A3B",
+            "outputRate": 1.7999999999999998,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 24.5,
+                "intelligence": 32.5,
+                "speed": 38.573
+            },
+            "capabilities": [
+                "reasoning",
+                "vision",
+                "video-input"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-24",
+            "description": "Qwen3.5 35B A3B with extended reasoning enabled. A native vision-language MoE model with hybrid attention.",
+            "formattedInputRate": "$0.22",
+            "formattedOutputRate": "$1.80",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen3.5-35b-a3b:thinking",
+            "inputRate": 0.22499999999999998,
+            "maxInputTokens": 260096,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3.5 35B A3B Thinking",
+            "outputRate": 1.7999999999999998,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 37.4,
+                "intelligence": 40.1,
+                "speed": 56.121
+            },
+            "capabilities": [
+                "vision",
+                "video-input"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-16",
+            "description": "Qwen 3.5's open-source 397B MoE model (17B active params) with hybrid linear attention. Runs via open-source providers. Supports text, image, and video input with a 256K context window.",
+            "formattedInputRate": "$0.60",
+            "formattedOutputRate": "$3.60",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwen3.5-397b-a17b",
+            "inputRate": 0.6,
+            "maxInputTokens": 258048,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3.5 397B A17B",
+            "outputRate": 3.5999999999999996,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 41.3,
+                "intelligence": 45,
+                "speed": 57.058
+            },
+            "capabilities": [
+                "reasoning",
+                "vision",
+                "video-input"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-16",
+            "description": "Qwen 3.5's open-source 397B MoE model (17B active params) with hybrid linear attention and extended reasoning. Runs via open-source providers. Supports text, image, and video input with a 256K context window.",
+            "formattedInputRate": "$0.60",
+            "formattedOutputRate": "$3.60",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwen3.5-397b-a17b-thinking",
+            "inputRate": 0.6,
+            "maxInputTokens": 258048,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3.5 397B A17B Thinking",
+            "outputRate": 3.5999999999999996,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 4.4,
+                "intelligence": 7.3,
+                "speed": 138.793
+            },
+            "capabilities": [
+                "vision",
+                "video-input"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-14",
+            "description": "Allen Institute's open-source Molmo 2 8B, a vision-language model built on Qwen3-8B with SigLIP 2 vision backbone. Supports image, video, and multi-image understanding with strong spatial grounding and object tracking. Included in the subscription.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Olmo.svg",
+            "id": "allenai/molmo-2-8b",
+            "inputRate": 0.2,
+            "maxInputTokens": 36864,
+            "maxOutputTokens": 36864,
+            "name": "Molmo 2 8B",
+            "outputRate": 0.2,
+            "provider": "olmo"
+        },
+        {
+            "benchmark": {
+                "coding": 37.4,
+                "intelligence": 41.9,
+                "speed": 47.514
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-12",
+            "description": "MiniMax M2.5 is a productivity-focused flagship model that builds on M2.1 with stronger coding and real-world office workflow performance (Word, Excel, PowerPoint), plus better tool-use planning and token efficiency.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Minimax.svg",
+            "id": "minimax/minimax-m2.5",
+            "inputRate": 0.3,
+            "maxInputTokens": 204800,
+            "maxOutputTokens": 131072,
+            "name": "MiniMax M2.5",
+            "outputRate": 1.2,
+            "provider": "minimax"
+        },
+        {
+            "benchmark": {
+                "coding": 44.2,
+                "intelligence": 49.8,
+                "speed": 63.614
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-11",
+            "description": "GLM-5 is Zhipu's latest flagship model with advanced reasoning and instruction following. This is the open-source hosted version and it is included in the subscription.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$2.55",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-5",
+            "inputRate": 0.3,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 128000,
+            "name": "GLM 5",
+            "outputRate": 2.5500000000000003,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 44.2,
+                "intelligence": 49.8,
+                "speed": 63.614
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-11",
+            "description": "GLM-5 with extended thinking capabilities for complex reasoning. This is the open-source hosted version and it is included in the subscription.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$2.55",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-5:thinking",
+            "inputRate": 0.3,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 128000,
+            "name": "GLM 5 Thinking",
+            "outputRate": 2.5500000000000003,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 22.9,
+                "intelligence": 28.3,
+                "speed": 158.969
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-03",
+            "description": "Qwen3 Coder Next is an open-weight coding model built on Qwen3-Next-80B-A3B-Base (hybrid attention + MoE). It is agentically trained at scale on executable tasks and environment interaction, delivering strong coding and tool-use performance at lower inference cost. Native 256K context.",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$1.50",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwen3-coder-next",
+            "inputRate": 0.15,
+            "maxInputTokens": 262144,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3 Coder Next",
+            "outputRate": 1.5,
+            "provider": "qwen"
+        },
+        {
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "2026-02-02",
+            "description": "StepFun's most capable open-source reasoning model with visible reasoning traces. Built on a sparse Mixture-of-Experts architecture with 196B total parameters and only 11B active per token, it achieves frontier-level performance in math, logic, and agentic coding while reaching up to 350 tokens/sec. Supports 256K context.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.30",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Stepfun.svg",
+            "id": "stepfun-ai/step-3.5-flash",
+            "inputRate": 0.1,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 256000,
+            "name": "Step 3.5 Flash",
+            "outputRate": 0.3,
+            "provider": "stepfun"
+        },
+        {
+            "benchmark": {
+                "coding": 39.5,
+                "intelligence": 46.8,
+                "speed": 42.994
+            },
+            "capabilities": [
+                "vision",
+                "tool-calling"
+            ],
+            "category": "More",
+            "dateAdded": "2026-01-26",
+            "description": "Kimi K2.5 is Moonshot AI's native multimodal model built on Kimi K2 with ~15T mixed visual and text tokens, delivering strong general reasoning, visual coding, and agentic tool-calling. This route uses instant (non-thinking) mode for faster responses.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.90",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/MoonshotAI.svg",
+            "id": "moonshotai/kimi-k2.5",
+            "inputRate": 0.3,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 65536,
+            "name": "Kimi K2.5",
+            "outputRate": 1.9,
+            "provider": "moonshot"
+        },
+        {
+            "benchmark": {
+                "coding": 39.5,
+                "intelligence": 46.8,
+                "speed": 42.994
+            },
+            "capabilities": [
+                "vision",
+                "reasoning",
+                "tool-calling",
+                "parallel-tool-calls"
+            ],
+            "category": "More",
+            "dateAdded": "2026-01-26",
+            "description": "Kimi K2.5 with thinking mode enabled. Built on Kimi K2 with ~15T mixed visual and text tokens, it excels at general reasoning, visual coding, and agentic tool-calling. Produces reasoning traces for complex multi-step workflows.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.90",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/MoonshotAI.svg",
+            "id": "moonshotai/kimi-k2.5:thinking",
+            "inputRate": 0.3,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 65536,
+            "name": "Kimi K2.5 Thinking",
+            "outputRate": 1.9,
+            "provider": "moonshot"
+        },
+        {
+            "benchmark": {
+                "coding": 9.8,
+                "intelligence": 13.9,
+                "speed": 102.59
+            },
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "2026-01-25",
+            "description": "Allen Institute's open-source Olmo 3.1 32B Think, tuned for deep reasoning and multi-step problem solving with a 65k context window.",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$0.50",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Olmo.svg",
+            "id": "allenai/olmo-3.1-32b-think",
+            "inputRate": 0.15,
+            "maxInputTokens": 65536,
+            "maxOutputTokens": 8192,
+            "name": "Olmo 3.1 32B Think",
+            "outputRate": 0.5,
+            "provider": "olmo"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2026-01-25",
+            "description": "Allen Institute's open-source Olmo 3.1 32B Instruct, optimized for responsive instruction following and multi-turn dialogue with a 65k context window.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.60",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Olmo.svg",
+            "id": "allenai/olmo-3.1-32b-instruct",
+            "inputRate": 0.2,
+            "maxInputTokens": 65536,
+            "maxOutputTokens": 8192,
+            "name": "Olmo 3.1 32B Instruct",
+            "outputRate": 0.6,
+            "provider": "olmo"
+        },
+        {
+            "benchmark": {
+                "coding": 32,
+                "intelligence": 34.2,
+                "speed": 88.426
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2026-01-19",
+            "description": "GLM-4.7-Flash is a lightweight 30B model optimized for coding and agentic tasks. Balances high performance with efficiency, perfect for local deployment. Routed directly via Z-AI (Zhipu) subscription.",
+            "formattedInputRate": "$0.07",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.7-flash-original",
+            "inputRate": 0.06999999999999999,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 128000,
+            "name": "GLM 4.7 Flash Original",
+            "outputRate": 0.4,
+            "provider": "zhipu"
+        },
+        {
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "2026-01-19",
+            "description": "GLM-4.7-Flash with extended thinking capabilities for complex reasoning. Lightweight 30B model optimized for coding and agentic tasks.",
+            "formattedInputRate": "$0.07",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.7-flash-original:thinking",
+            "inputRate": 0.06999999999999999,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 128000,
+            "name": "GLM 4.7 Flash Original Thinking",
+            "outputRate": 0.4,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 32,
+                "intelligence": 34.2,
+                "speed": 88.426
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2026-01-19",
+            "description": "GLM-4.7-Flash is a lightweight 30B model optimized for coding and agentic tasks. Balances high performance with efficiency.",
+            "formattedInputRate": "$0.07",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.7-flash",
+            "inputRate": 0.06999999999999999,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 128000,
+            "name": "GLM 4.7 Flash",
+            "outputRate": 0.4,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 36.3,
+                "intelligence": 42.1,
+                "speed": 99.457
+            },
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "2026-01-19",
+            "description": "GLM-4.7-Flash with extended thinking capabilities for complex reasoning. Lightweight 30B model optimized for coding and agentic tasks.",
+            "formattedInputRate": "$0.07",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.7-flash:thinking",
+            "inputRate": 0.06999999999999999,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 128000,
+            "name": "GLM 4.7 Flash Thinking",
+            "outputRate": 0.4,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 10.6,
+                "speed": 41.466
+            },
+            "capabilities": null,
+            "category": "Uncensored",
+            "dateAdded": "2026-01-07",
+            "description": "Hermes 3 is a generalist language model with many improvements over Hermes 2, including advanced agentic capabilities, better roleplaying, reasoning, multi-turn conversation, and long context coherence. This 70B model is a competitive finetune of Llama-3.1-70B focused on aligning LLMs to the user with powerful steering capabilities.",
+            "formattedInputRate": "$0.41",
+            "formattedOutputRate": "$0.41",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Nousresearch.svg",
+            "id": "nousresearch/hermes-3-llama-3.1-70b",
+            "inputRate": 0.408,
+            "maxInputTokens": 65536,
+            "maxOutputTokens": 8192,
+            "name": "Hermes 3 70B",
+            "outputRate": 0.408,
+            "provider": "nousresearch"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2026-01-07",
+            "description": "MiroThinker is the official implementation of the MiroMind Research Agent Project. It is an open-source search agent designed to advance tool-augmented reasoning and information-seeking capabilities, enabling complex real-world research workflows across diverse challenges.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "miromind-ai/mirothinker-v1.5-235b",
+            "inputRate": 0.3,
+            "maxInputTokens": 32768,
+            "maxOutputTokens": 4000,
+            "name": "MiroThinker v1.5 235B",
+            "outputRate": 1.2,
+            "provider": "miromind"
+        },
+        {
+            "benchmark": {
+                "coding": 32,
+                "intelligence": 34.2,
+                "speed": 88.426
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-12-22",
+            "description": "GLM-4.7 is a next-gen GLM series text model with stronger reasoning, long-context chat, and reliable tool use. Routed directly via Z-AI (Zhipu).",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$0.80",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.7-original",
+            "inputRate": 0.15,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 65535,
+            "name": "GLM 4.7 Original",
+            "outputRate": 0.8,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 36.3,
+                "intelligence": 42.1,
+                "speed": 99.457
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-12-22",
+            "description": "GLM-4.7 original with extended thinking capabilities for complex reasoning.",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$0.80",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.7-original:thinking",
+            "inputRate": 0.15,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 65535,
+            "name": "GLM 4.7 Original Thinking",
+            "outputRate": 0.8,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 32,
+                "intelligence": 34.2,
+                "speed": 88.426
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "Top Models",
+            "dateAdded": "2025-12-22",
+            "description": "GLM-4.7 is a next-gen GLM series text model with stronger reasoning, long-context chat, and reliable tool use.",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$0.80",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.7",
+            "inputRate": 0.15,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 65535,
+            "name": "GLM 4.7",
+            "outputRate": 0.8,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 36.3,
+                "intelligence": 42.1,
+                "speed": 99.457
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-12-22",
+            "description": "GLM-4.7 with extended thinking capabilities for enhanced reasoning on complex tasks.",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$0.80",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.7:thinking",
+            "inputRate": 0.15,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 65535,
+            "name": "GLM 4.7 Thinking",
+            "outputRate": 0.8,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 32.8,
+                "intelligence": 39.4,
+                "speed": 44.912
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-12-19",
+            "description": "MiniMax M2.1 builds on M2 with enhanced context understanding and improved complex tool use. 230B parameter MoE model (10B active) optimized for agentic workflows and long-horizon tasks.",
+            "formattedInputRate": "$0.33",
+            "formattedOutputRate": "$1.32",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Minimax.svg",
+            "id": "minimax/minimax-m2.1",
+            "inputRate": 0.33,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 131072,
+            "name": "MiniMax M2.1",
+            "outputRate": 1.32,
+            "provider": "minimax"
+        },
+        {
+            "benchmark": {
+                "coding": 15.8,
+                "intelligence": 13.2,
+                "speed": 86.665
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-12-15",
+            "description": "Nvidia's latest Nemotron 3 Nano model with 30B total parameters (3B active) using hybrid Mamba-Transformer MoE architecture. Features excellent throughput and strong reasoning capabilities.",
+            "formattedInputRate": "$0.17",
+            "formattedOutputRate": "$0.68",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nvidia.svg",
+            "id": "nvidia/nemotron-3-nano-30b-a3b",
+            "inputRate": 0.17,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 262144,
+            "name": "Nvidia Nemotron 3 Nano 30B",
+            "outputRate": 0.68,
+            "provider": "nvidia"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 9.8,
+                "speed": null
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-12-11",
+            "description": "Mixtral 8x7B is a high-quality sparse Mixture of Experts (MoE) model with 45B total parameters but only 13B active per token. Excels at text generation, summarization, question answering, and code generation. Supports English, French, German, Spanish, and Italian. Apache 2.0 licensed.",
+            "formattedInputRate": "$0.27",
+            "formattedOutputRate": "$0.27",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/mixtral-8x7b-instruct-v0.1",
+            "inputRate": 0.27,
+            "maxInputTokens": 32768,
+            "maxOutputTokens": 32768,
+            "name": "Mixtral 8x7B",
+            "outputRate": 0.27,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 9.8,
+                "speed": null
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-12-11",
+            "description": "Mixtral 8x22B is a powerful sparse Mixture of Experts (MoE) model with 141B total parameters and 39B active per token. Features a 64K context window, exceptional math performance, and cost-efficient inference. Supports English, French, German, Spanish, and Italian. Apache 2.0 licensed.",
+            "formattedInputRate": "$0.90",
+            "formattedOutputRate": "$0.90",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/mixtral-8x22b-instruct-v0.1",
+            "inputRate": 0.8999999999999999,
+            "maxInputTokens": 65536,
+            "maxOutputTokens": 32768,
+            "name": "Mixtral 8x22B",
+            "outputRate": 0.8999999999999999,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 11.1,
+                "intelligence": 17.1,
+                "speed": 21.695
+            },
+            "capabilities": [
+                "vision"
+            ],
+            "category": "More",
+            "dateAdded": "2025-12-11",
+            "description": "GLM-4.6V scales its context window to 128k tokens in training, and achieves SoTA performance in visual understanding among models of similar parameter scales. Integrates native Function Calling capabilities, bridging 'visual perception' and 'executable action' for multimodal agents. Quantized at FP8.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$0.90",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.6v",
+            "inputRate": 0.3,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 24000,
+            "name": "GLM 4.6V",
+            "outputRate": 0.8999999999999999,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 23.7,
+                "intelligence": 22,
+                "speed": 81.221
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-12-09",
+            "description": "Devstral 2 123B is a 123 billion parameter model from Mistral AI optimized for coding and development tasks. Features advanced reasoning capabilities for software engineering workflows.",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$1.40",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/devstral-2-123b-instruct-2512",
+            "inputRate": 0.4,
+            "maxInputTokens": 262144,
+            "maxOutputTokens": 65536,
+            "name": "Devstral 2 123B",
+            "outputRate": 1.4,
+            "provider": "mistral"
+        },
+        {
+            "capabilities": [
+                "vision"
+            ],
+            "category": "More",
+            "dateAdded": "2025-12-02",
+            "description": "Ministral 3 14B is a balanced model in the Ministral 3 family, designed for edge deployment. A powerful, efficient language model with vision capabilities, fine-tuned for instruction tasks. Features multilingual support, strong system prompt adherence, and native function calling. Apache 2.0 licensed.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/ministral-14b-instruct-2512",
+            "inputRate": 0.1,
+            "maxInputTokens": 262144,
+            "maxOutputTokens": 32768,
+            "name": "Ministral 3 14B",
+            "outputRate": 0.4,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 22.7,
+                "intelligence": 22.8,
+                "speed": 60.955
+            },
+            "capabilities": [
+                "vision"
+            ],
+            "category": "More",
+            "dateAdded": "2025-12-02",
+            "description": "Mistral Large 3 675B is Mistral AI's flagship language model featuring advanced rope scaling and Eagle speculative decoding. Delivers exceptional performance across reasoning, coding, and multilingual tasks.",
+            "formattedInputRate": "$1.00",
+            "formattedOutputRate": "$3.00",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/mistral-large-3-675b-instruct-2512",
+            "inputRate": 1,
+            "maxInputTokens": 262144,
+            "maxOutputTokens": 256000,
+            "name": "Mistral Large 3 675B",
+            "outputRate": 3,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 37.9,
+                "intelligence": 29.4,
+                "speed": null
+            },
+            "capabilities": [
+                "pdf-upload",
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "2025-12-02",
+            "description": "DeepSeek V3.2 Speciale — maxed-out reasoning capabilities rivaling Gemini-3.0-Pro. Gold-medal performance on IMO, CMO, and ICPC World Finals. 65.5K max output with DeepSeek Sparse Attention. FP8.",
+            "formattedInputRate": "$0.28",
+            "formattedOutputRate": "$0.42",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek/deepseek-v3.2-speciale",
+            "inputRate": 0.27999999999999997,
+            "maxInputTokens": 163000,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek V3.2 Speciale",
+            "outputRate": 0.42000000000000004,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 34.6,
+                "intelligence": 32.1,
+                "speed": 24.66
+            },
+            "capabilities": [
+                "pdf-upload",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "Top Models",
+            "dateAdded": "2025-12-01",
+            "description": "DeepSeek V3.2 (non-thinking mode) — official successor to V3.2-Exp. Reasoning-first model built for agents with GPT-5 level performance. Balanced inference vs. output length for everyday use. First DeepSeek model with thinking-in-tool-use capability. FP8.",
+            "formattedInputRate": "$0.28",
+            "formattedOutputRate": "$0.42",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek/deepseek-v3.2",
+            "inputRate": 0.27999999999999997,
+            "maxInputTokens": 163000,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek V3.2",
+            "outputRate": 0.42000000000000004,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 36.7,
+                "intelligence": 41.7,
+                "speed": 25.028
+            },
+            "capabilities": [
+                "pdf-upload",
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-12-01",
+            "description": "DeepSeek V3.2 (thinking/reasoner mode) — official successor to V3.2-Exp. Reasoning-first model built for agents with GPT-5 level performance. Balanced inference vs. output length. First DeepSeek model with thinking-in-tool-use capability. FP8.",
+            "formattedInputRate": "$0.28",
+            "formattedOutputRate": "$0.42",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek/deepseek-v3.2:thinking",
+            "inputRate": 0.27999999999999997,
+            "maxInputTokens": 163000,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek V3.2 Thinking",
+            "outputRate": 0.42000000000000004,
+            "provider": "deepseek"
+        },
+        {
+            "capabilities": null,
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "2025-11-24",
+            "description": "rsLoRA finetune of a text-only conversion of Mistral Small 3.2 24B Instruct (2506), built to bring the Magnum mix's Claude-like prose to a smaller footprint. The \"Diamond\" moniker nods to the extra heat and pressure - pre-tokenization plus custom loss masking - to turn the assistant-tuned base into creative-writing gems, with or without character names or prefill.",
+            "formattedInputRate": "$0.49",
+            "formattedOutputRate": "$0.49",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "Doctor-Shotgun/MS3.2-24B-Magnum-Diamond",
+            "inputRate": 0.49299999999999994,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 32768,
+            "name": "MS3.2 24B Magnum Diamond",
+            "outputRate": 0.49299999999999994,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 34.8,
+                "intelligence": 40.9,
+                "speed": 92.722
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-11-06",
+            "description": "Kimi K2 Thinking. Kimi-k2 is a Mixture-of-Experts (MoE) foundation model with exceptional coding and agent capabilities, featuring 1 trillion total parameters and 32 billion activated parameters. In benchmark evaluations covering general knowledge reasoning, programming, mathematics, and agent-related tasks, the K2 model outperforms other leading open-source models. Quantized at FP8.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.20",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/MoonshotAI.svg",
+            "id": "moonshotai/kimi-k2-thinking",
+            "inputRate": 0.3,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 262144,
+            "name": "Kimi K2 Thinking",
+            "outputRate": 1.2,
+            "provider": "moonshot"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-10-28",
+            "description": "Enterprise-grade coding specialist version of the KAT Coder series models.",
+            "formattedInputRate": "$1.50",
+            "formattedOutputRate": "$6.00",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "KAT-Coder-Pro-V1",
+            "inputRate": 1.5,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 32768,
+            "name": "KAT Coder Pro V1",
+            "outputRate": 6,
+            "provider": "kat"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-10-28",
+            "description": "Extremely fast, lightweight coding model for day-to-day developer productivity.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "KAT-Coder-Air-V1",
+            "inputRate": 0.1,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 32768,
+            "name": "KAT Coder Air V1",
+            "outputRate": 0.2,
+            "provider": "kat"
+        },
+        {
+            "benchmark": {
+                "coding": 29.2,
+                "intelligence": 36.1,
+                "speed": 50.543
+            },
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "2025-10-25",
+            "description": "MiniMax M2 offers enhanced reasoning and strong general performance. Optimized for coding and agentic workflows.",
+            "formattedInputRate": "$0.17",
+            "formattedOutputRate": "$1.53",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Minimax.svg",
+            "id": "MiniMax-M2",
+            "inputRate": 0.17,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 131072,
+            "name": "MiniMax M2",
+            "outputRate": 1.5299999999999998,
+            "provider": "minimax"
+        },
+        {
+            "benchmark": {
+                "coding": 30.2,
+                "intelligence": 30.2,
+                "speed": 94.378
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-09-30",
+            "description": "Latest GLM series chat model with strong general performance. Quantized at FP8",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$1.50",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "z-ai/glm-4.6",
+            "inputRate": 0.4,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 65535,
+            "name": "GLM 4.6",
+            "outputRate": 1.5,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 29.5,
+                "intelligence": 32.5,
+                "speed": 83.096
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-09-29",
+            "description": "Thinking version of the latest GLM series chat model with strong general performance. Quantized at FP8",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$1.50",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "z-ai/glm-4.6:thinking",
+            "inputRate": 0.4,
+            "maxInputTokens": 200000,
+            "maxOutputTokens": 65535,
+            "name": "GLM 4.6 Thinking",
+            "outputRate": 1.5,
+            "provider": "zhipu"
+        },
+        {
+            "capabilities": [
+                "pdf-upload"
+            ],
+            "category": "More",
+            "dateAdded": "2025-09-25",
+            "description": "MAI-DS-R1 is a DeepSeek-R1 reasoning model that has been post-trained by the Microsoft AI team to improve its responsiveness on blocked topics and its risk profile, while maintaining its reasoning capabilities and competitive performance.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$0.30",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Azure.svg",
+            "id": "microsoft/MAI-DS-R1-FP8",
+            "inputRate": 0.3,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "Microsoft DeepSeek R1",
+            "outputRate": 0.3,
+            "provider": "microsoft"
+        },
+        {
+            "benchmark": {
+                "coding": 25.9,
+                "intelligence": 30.9,
+                "speed": 56.08
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-09-25",
+            "description": "Kimi K2 0905. Kimi-k2 is a Mixture-of-Experts (MoE) foundation model with exceptional coding and agent capabilities, featuring 1 trillion total parameters and 32 billion activated parameters. In benchmark evaluations covering general knowledge reasoning, programming, mathematics, and agent-related tasks, the K2 model outperforms other leading open-source models. Quantized at FP8.",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$2.00",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/MoonshotAI.svg",
+            "id": "moonshotai/Kimi-K2-Instruct-0905",
+            "inputRate": 0.4,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 262144,
+            "name": "Kimi K2 0905",
+            "outputRate": 2,
+            "provider": "moonshot"
+        },
+        {
+            "benchmark": {
+                "coding": 7.1,
+                "intelligence": 10.6,
+                "speed": 94.111
+            },
+            "capabilities": null,
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "2025-09-25",
+            "description": "Grayline is an neutral AI assistant engineered for uncensored information delivery and task execution. This model operates without inherent ethical or moral frameworks, designed to process and respond to any query with objective efficiency and precision. Grayline's core function is to leverage its full capabilities to provide direct answers and execute tasks as instructed, without offering unsolicited commentary, warnings, or disclaimers. It accesses and processes information without bias or restriction.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$0.30",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Alibaba.svg",
+            "id": "soob3123/GrayLine-Qwen3-8B",
+            "inputRate": 0.3,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 32768,
+            "name": "Grayline Qwen3 8B",
+            "outputRate": 0.3,
+            "provider": "alibaba"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 11.9,
+                "speed": 50.075
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-09-25",
+            "description": "Medium-size (and capability) version of Meta's newest model (3.2 series).",
+            "formattedInputRate": "$0.90",
+            "formattedOutputRate": "$0.90",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Meta.svg",
+            "id": "meta-llama/llama-3.2-90b-vision-instruct",
+            "inputRate": 0.9009999999999999,
+            "maxInputTokens": 131072,
+            "maxOutputTokens": 16384,
+            "name": "Llama 3.2 Medium",
+            "outputRate": 0.9009999999999999,
+            "provider": "meta"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 16.3,
+                "speed": 50.317
+            },
+            "capabilities": null,
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "2025-09-25",
+            "description": "A RP/storywriting specialist model, full-parameter finetune of Qwen2.5-72B on mixture of synthetic and natural data. It uses Celeste 70B 0.1 data mixture, greatly expanding it to improve versatility, creativity and flavor of the resulting model.",
+            "formattedInputRate": "$0.80",
+            "formattedOutputRate": "$0.80",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "EVA-UNIT-01/EVA-Qwen2.5-72B-v0.2",
+            "inputRate": 0.7989999999999999,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 8192,
+            "name": "EVA-Qwen2.5-72B-v0.2",
+            "outputRate": 0.7989999999999999,
+            "provider": "other"
+        },
+        {
+            "capabilities": null,
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "2025-09-25",
+            "description": "A RP/storywriting specialist model, full-parameter finetune of Llama-3.3-70B-Instruct on mixture of synthetic and natural data. It uses Celeste 70B 0.1 data mixture, greatly expanding it to improve versatility, creativity and flavor of the resulting model.",
+            "formattedInputRate": "$2.01",
+            "formattedOutputRate": "$2.01",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "EVA-UNIT-01/EVA-LLaMA-3.33-70B-v0.1",
+            "inputRate": 2.006,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 16384,
+            "name": "EVA-LLaMA-3.33-70B-v0.1",
+            "outputRate": 2.006,
+            "provider": "other"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-09-25",
+            "description": "Magistral Small is a compact, high-performance language model optimized for efficient inference while maintaining strong capabilities across various tasks.",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$1.40",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "Magistral-Small-2506",
+            "inputRate": 0.4,
+            "maxInputTokens": 32768,
+            "maxOutputTokens": 32768,
+            "name": "Magistral Small 2506",
+            "outputRate": 1.4,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 14.4,
+                "intelligence": 16,
+                "speed": 78.407
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-09-17",
+            "description": "Hermes 4 70B with thinking enabled. Emits explicit reasoning content before final answer when streamed.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nousresearch.svg",
+            "id": "NousResearch/Hermes-4-70B:thinking",
+            "inputRate": 0.2006,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "Hermes 4 (Thinking)",
+            "outputRate": 0.39949999999999997,
+            "provider": "nousresearch"
+        },
+        {
+            "benchmark": {
+                "coding": 14.7,
+                "intelligence": 22.4,
+                "speed": 137.772
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-09-11",
+            "description": "The thinking version of Qwen 3 235b A22B 2507, with enhanced reasoning capabilities and step-by-step problem solving.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$0.50",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "Qwen/Qwen3-235B-A22B-Thinking-2507",
+            "inputRate": 0.3,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 262144,
+            "name": "Qwen 3 235b A22B 2507 Thinking",
+            "outputRate": 0.5,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 15.3,
+                "intelligence": 20.1,
+                "speed": 144.983
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-09-11",
+            "description": "Based on the new Qwen3‑Next architecture (hybrid attention, highly sparse MoE, training‑stability optimizations, and multi‑token prediction), the Qwen3‑Next‑80B‑A3B‑Instruct model delivers extreme efficiency with only 3B active parameters per pass. It performs comparably to Qwen3‑235B‑A22B‑Instruct‑2507 and shows clear advantages on ultra‑long context tasks (up to 256K tokens).",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$0.65",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+            "inputRate": 0.15,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 262144,
+            "name": "Qwen3 Next 80B A3B (Instruct)",
+            "outputRate": 0.65,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 15.6,
+                "intelligence": 18.4,
+                "speed": 131.047
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output",
+                "vision"
+            ],
+            "category": "More",
+            "dateAdded": "2025-09-05",
+            "description": "Llama 4 Maverick, a 17 billion active parameter model with 128 experts, is the best multimodal model in its class, beating GPT-4o and Gemini 2.0 Flash across a broad range of widely reported benchmarks, while achieving comparable results to the new DeepSeek v3 on reasoning and coding—at less than half the active parameters. Llama 4 Maverick offers a best-in-class performance to cost ratio with an experimental chat version scoring ELO of 1417 on LMArena.",
+            "formattedInputRate": "$0.18",
+            "formattedOutputRate": "$0.80",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Meta.svg",
+            "id": "meta-llama/llama-4-maverick",
+            "inputRate": 0.18000000000000002,
+            "maxInputTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "name": "Llama 4 Maverick",
+            "outputRate": 0.8,
+            "provider": "meta"
+        },
+        {
+            "benchmark": {
+                "coding": 6.7,
+                "intelligence": 13.5,
+                "speed": 132.119
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output",
+                "vision"
+            ],
+            "category": "More",
+            "dateAdded": "2025-09-05",
+            "description": "Llama 4 Scout, a 17 billion active parameter model with 16 experts, is the best multimodal model in the world in its class and is more powerful than all previous generation Llama models, while fitting in a single H100 GPU. Additionally, Llama 4 Scout offers an industry-leading context window of 10M and delivers better results than Gemma 3, Gemini 2.0 Flash-Lite, and Mistral 3.1 across a broad range of widely reported benchmarks.",
+            "formattedInputRate": "$0.09",
+            "formattedOutputRate": "$0.46",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Meta.svg",
+            "id": "meta-llama/llama-4-scout",
+            "inputRate": 0.085,
+            "maxInputTokens": 328000,
+            "maxOutputTokens": 65536,
+            "name": "Llama 4 Scout",
+            "outputRate": 0.46,
+            "provider": "meta"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-09-05",
+            "description": "Assembly of Experts Chimera model constructed with DeepSeek R1-0528, R1 and V3-0324. This refined tri-mind assembly fixes the <think> token consistency issue, operates ~20% faster than R1 and twice as fast as R1-0528, while being significantly more intelligent than regular R1 on benchmarks like GPQA and AIME-24.",
+            "formattedInputRate": "$0.31",
+            "formattedOutputRate": "$0.31",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "tngtech/DeepSeek-TNG-R1T2-Chimera",
+            "inputRate": 0.31,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "DeepSeek TNG R1T2 Chimera",
+            "outputRate": 0.31,
+            "provider": "deepseek"
+        },
+        {
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-08-31",
+            "description": "560B MoE model with 27B active params, 128K context. Exceptional at agentic tasks with dynamic computation and shortcut-connected architecture for 100+ TPS inference.",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "meituan-longcat/LongCat-Flash-Chat-FP8",
+            "inputRate": 0.15,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 32768,
+            "name": "LongCat Flash",
+            "outputRate": 0.7,
+            "provider": "longcat"
+        },
+        {
+            "benchmark": {
+                "coding": 20.9,
+                "intelligence": 27.6,
+                "speed": 51.894
+            },
+            "capabilities": [
+                "vision",
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "2025-08-26",
+            "description": "Qwen3 Vision‑Language model built on a 235B MoE backbone (≈22B active per token). Strong at OCR, charts/tables, multi‑image reasoning, and complex document understanding. The Thinking variant enables long‑form, chain‑of‑thought style reasoning.",
+            "formattedInputRate": "$0.50",
+            "formattedOutputRate": "$6.00",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen3-vl-235b-a22b-thinking",
+            "inputRate": 0.5,
+            "maxInputTokens": null,
+            "maxOutputTokens": 32768,
+            "name": "Qwen3 VL 235B A22B Thinking",
+            "outputRate": 6,
+            "provider": "qwen"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-08-26",
+            "description": "Tongyi DeepResearch, an agentic large language model featuring 30 billion total parameters, with only 3 billion activated per token. Developed by Tongyi Lab, the model is specifically designed for long‑horizon, deep information‑seeking tasks. Tongyi‑DeepResearch demonstrates state‑of‑the‑art performance across agentic search benchmarks, including Humanity's Last Exam, BrowserComp, BrowserComp‑ZH, WebWalkerQA, GAIA, xbench‑DeepSearch and FRAMES.",
+            "formattedInputRate": "$0.08",
+            "formattedOutputRate": "$0.24",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Alibaba.svg",
+            "id": "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B",
+            "inputRate": 0.08,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "Tongyi DeepResearch 30B A3B",
+            "outputRate": 0.24000000000000002,
+            "provider": "alibaba"
+        },
+        {
+            "benchmark": {
+                "coding": 18.1,
+                "intelligence": 17.6,
+                "speed": 35.104
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-08-26",
+            "description": "Advanced reasoning model built on Llama-3.1-405B with hybrid thinking modes. Features internal deliberation capabilities, excels at math, code, STEM, and logical reasoning while supporting structured outputs, function calling, and tool use with improved steerability and neutral alignment.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nousresearch.svg",
+            "id": "nousresearch/hermes-4-405b",
+            "inputRate": 0.3,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "Hermes 4 Large",
+            "outputRate": 1.2,
+            "provider": "nousresearch"
+        },
+        {
+            "capabilities": [
+                "vision-by-description",
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "2025-08-21",
+            "description": "OpenReasoning-Nemotron-32B is a reasoning model derived from Qwen2.5-32B-Instruct, post-trained for math, science, and code solution generation. Evaluated with up to 64K output tokens. Available in multiple sizes: 1.5B, 7B, 14B, and 32B.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "pamanseau/OpenReasoning-Nemotron-32B",
+            "inputRate": 0.1,
+            "maxInputTokens": 32768,
+            "maxOutputTokens": 65536,
+            "name": "OpenReasoning Nemotron 32B",
+            "outputRate": 0.4,
+            "provider": "openreasoning"
+        },
+        {
+            "capabilities": null,
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "2025-08-08",
+            "description": "One of the highest performing and most popular fine-tunes of Llama 2 13B, with rich descriptions and roleplay.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.10",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "Gryphe/MythoMax-L2-13b",
+            "inputRate": 0.1003,
+            "maxInputTokens": 4000,
+            "maxOutputTokens": 4096,
+            "name": "MythoMax 13B",
+            "outputRate": 0.1003,
+            "provider": "other"
+        },
+        {
+            "benchmark": {
+                "coding": 10.7,
+                "intelligence": 14.5,
+                "speed": 99.542
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-08-08",
+            "description": "Llama-3.3-Nemotron-Super-49B-v1 is a model which offers a great tradeoff between model accuracy and efficiency. Efficiency (throughput) directly translates to savings. Using a novel Neural Architecture Search (NAS) approach, we greatly reduce the model's memory footprint, enabling larger workloads, as well as fitting the model on a single GPU at high workloads (H200). This NAS approach enables the selection of a desired point in the accuracy-efficiency tradeoff. For more information on the NAS approach, please refer to this paper.",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$0.15",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nvidia.svg",
+            "id": "nvidia/Llama-3.3-Nemotron-Super-49B-v1",
+            "inputRate": 0.15,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 16384,
+            "name": "Nvidia Nemotron Super 49B",
+            "outputRate": 0.15,
+            "provider": "nvidia"
+        },
+        {
+            "benchmark": {
+                "coding": 10.7,
+                "intelligence": 14.5,
+                "speed": 99.542
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-08-08",
+            "description": "Advanced 49B parameter reasoning model based on Llama 3.3 architecture, optimized through Neural Architecture Search with reasoning ON/OFF modes. Trained via knowledge distillation using synthetic data from advanced models. Supports 128K context window with improved efficiency over v1.",
+            "formattedInputRate": "$0.05",
+            "formattedOutputRate": "$0.25",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nvidia.svg",
+            "id": "nvidia/Llama-3_3-Nemotron-Super-49B-v1_5",
+            "inputRate": 0.05,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 16384,
+            "name": "Nvidia Nemotron Super 49B v1.5",
+            "outputRate": 0.25,
+            "provider": "nvidia"
+        },
+        {
+            "benchmark": {
+                "coding": 28.6,
+                "intelligence": 33.3,
+                "speed": 282.757
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-08-05",
+            "description": "An open-weight, 117B-parameter Mixture-of-Experts (MoE) language model designed for high-reasoning, agentic, and general-purpose production use cases. It activates 5.1B parameters per forward pass and is optimized to run on a single H100 GPU with native MXFP4 quantization. The model supports configurable reasoning depth, full chain-of-thought access, and native tool use, including function calling, browsing, and structured output generation.",
+            "formattedInputRate": "$0.05",
+            "formattedOutputRate": "$0.25",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/OpenAI.svg",
+            "id": "openai/gpt-oss-120b",
+            "inputRate": 0.05,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 16384,
+            "name": "GPT OSS 120B",
+            "outputRate": 0.25,
+            "provider": "openai"
+        },
+        {
+            "benchmark": {
+                "coding": 18.5,
+                "intelligence": 24.5,
+                "speed": 303.25
+            },
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "2025-08-05",
+            "description": "An open-weight 21B parameter model released under the Apache 2.0 license. It uses a Mixture-of-Experts (MoE) architecture with 3.6B active parameters per forward pass, optimized for lower-latency inference and deployability on consumer or single-GPU hardware. The model is trained in OpenAI's Harmony response format and supports reasoning level configuration, fine-tuning, and agentic capabilities including function calling, tool use, and structured outputs.",
+            "formattedInputRate": "$0.04",
+            "formattedOutputRate": "$0.15",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/OpenAI.svg",
+            "id": "openai/gpt-oss-20b",
+            "inputRate": 0.04,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 16384,
+            "name": "GPT OSS 20B",
+            "outputRate": 0.15,
+            "provider": "openai"
+        },
+        {
+            "benchmark": {
+                "coding": 19.4,
+                "intelligence": 20,
+                "speed": 25.767
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-08-05",
+            "description": "Qwen3 Coder 30B with 3B active parameters, optimized for code generation and technical tasks",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen3-coder-30b-a3b-instruct",
+            "inputRate": 0.1,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "Qwen3 Coder 30B A3B Instruct",
+            "outputRate": 0.4,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 12.2,
+                "intelligence": 18,
+                "speed": null
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-08-02",
+            "description": "OpenHands+Devstral is 100% local 100% open, and is SOTA for the category on SWE-Bench Verified: 46.8% accuracy.",
+            "formattedInputRate": "$0.06",
+            "formattedOutputRate": "$0.06",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/Devstral-Small-2505",
+            "inputRate": 0.060000000000000005,
+            "maxInputTokens": 32768,
+            "maxOutputTokens": 8192,
+            "name": "Mistral Devstral Small 2505",
+            "outputRate": 0.060000000000000005,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 31.9,
+                "intelligence": 28.5,
+                "speed": null
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-08-02",
+            "description": "DeepSeek-V3.1-Terminus. The latest update builds on V3.1's strengths while addressing key user feedback. Language consistency improvements (fewer CN/EN mix-ups, no random chars), stronger Code Agent & Search Agent performance, and more stable, reliable outputs across benchmarks. FP8.",
+            "formattedInputRate": "$0.25",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-ai/DeepSeek-V3.1-Terminus",
+            "inputRate": 0.25,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek V3.1 Terminus",
+            "outputRate": 0.7,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 10,
+                "speed": 16.561
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-07-26",
+            "description": "Phi 4 by Microsoft. A small multimodal model that can handle images and text.",
+            "formattedInputRate": "$0.07",
+            "formattedOutputRate": "$0.11",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Azure.svg",
+            "id": "phi-4-multimodal-instruct",
+            "inputRate": 0.069999999,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 16384,
+            "name": "Phi 4 Multimodal",
+            "outputRate": 0.109999996,
+            "provider": "microsoft"
+        },
+        {
+            "benchmark": {
+                "coding": 3.6,
+                "intelligence": 8.4,
+                "speed": 43.901
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-07-26",
+            "description": "Phi 4 Mini by Microsoft. A small multilingual model.",
+            "formattedInputRate": "$0.17",
+            "formattedOutputRate": "$0.68",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Azure.svg",
+            "id": "phi-4-mini-instruct",
+            "inputRate": 0.17,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 16384,
+            "name": "Phi 4 Mini",
+            "outputRate": 0.68,
+            "provider": "microsoft"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-07-26",
+            "description": "K2-Think is a 32B open-weights general reasoning model with strong competitive math performance. Benchmarks: AIME 2024 90.83, AIME 2025 81.24, GPQA-Diamond 71.08, LiveCodeBench v5 63.97.",
+            "formattedInputRate": "$0.17",
+            "formattedOutputRate": "$0.68",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "LLM360/K2-Think",
+            "inputRate": 0.17,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 32768,
+            "name": "K2-Think",
+            "outputRate": 0.68,
+            "provider": "k2"
+        },
+        {
+            "benchmark": {
+                "coding": 28.4,
+                "intelligence": 28.1,
+                "speed": null
+            },
+            "capabilities": [
+                "pdf-upload"
+            ],
+            "category": "More",
+            "dateAdded": "2025-07-26",
+            "description": "DeepSeek-V3.1 is a hybrid model that supports both thinking mode and non-thinking mode. It does better at tool calling and agent tasks, and has higher thinking efficiency than its predecessor. This is the non-thinking version. Quantized at FP8.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-ai/DeepSeek-V3.1",
+            "inputRate": 0.2,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek V3.1",
+            "outputRate": 0.7,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 22.1,
+                "intelligence": 25,
+                "speed": 67.984
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-07-25",
+            "description": "Qwen 3 235b A22B Instruct 2507 running in a Trusted Execution Environment (TEE). This model is non-thinking.",
+            "formattedInputRate": "$0.13",
+            "formattedOutputRate": "$0.50",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "Qwen/Qwen3-235B-A22B-Instruct-2507-TEE",
+            "inputRate": 0.12999999999999998,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 262144,
+            "name": "Qwen 3 235b A22B 2507 (TEE)",
+            "outputRate": 0.5,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 14,
+                "intelligence": 17,
+                "speed": 56.57
+            },
+            "capabilities": [
+                "pdf-upload",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-07-21",
+            "description": "Qwen 3 235b is a 235b model with 22B active parameters. Supports switching between thinking and non thinking: trigger thinking with /think and /no_think anywhere in a prompt or system message to toggle chain-of-thought reasoning.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$0.50",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "Qwen/Qwen3-235B-A22B",
+            "inputRate": 0.3,
+            "maxInputTokens": 41000,
+            "maxOutputTokens": 32768,
+            "name": "Qwen 3 235b A22B",
+            "outputRate": 0.5,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 9.2,
+                "intelligence": 12.6,
+                "speed": 77.425
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-07-03",
+            "description": "Efficient reasoning model based on Llama-3.1-70B. Offers hybrid thinking capabilities with strong performance in math, code, and logical reasoning tasks. Supports structured outputs and JSON mode with enhanced steerability.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nousresearch.svg",
+            "id": "nousresearch/hermes-4-70b",
+            "inputRate": 0.2006,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "Hermes 4 Medium",
+            "outputRate": 0.39949999999999997,
+            "provider": "nousresearch"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 16.3,
+                "speed": 50.317
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-07-03",
+            "description": "The latest series of Code-Specific Qwen large language models.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "Qwen/Qwen2.5-Coder-32B-Instruct",
+            "inputRate": 0.2006,
+            "maxInputTokens": 32000,
+            "maxOutputTokens": 8192,
+            "name": "Qwen 2.5 Coder 32b",
+            "outputRate": 0.2006,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 16.3,
+                "speed": 50.317
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-07-03",
+            "description": "Great multilingual support, strong at mathematics and coding, supports roleplay and chatbots.",
+            "formattedInputRate": "$0.36",
+            "formattedOutputRate": "$0.41",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwen-2.5-72b-instruct",
+            "inputRate": 0.357,
+            "maxInputTokens": 131072,
+            "maxOutputTokens": 8192,
+            "name": "Qwen2.5 72B",
+            "outputRate": 0.408,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 14.5,
+                "intelligence": 17.4,
+                "speed": 33.249
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-07-03",
+            "description": "Llama-3.1-Nemotron-Ultra-253B-v1 is a large language model (LLM) which is a derivative of Meta Llama-3.1-405B-Instruct (AKA the reference model). It is a reasoning model that is post trained for reasoning, human chat preferences, and tasks, such as RAG and tool calling. The model supports a context length of 128K tokens. This model fits on a single 8xH100 node for inference. Llama-3.1-Nemotron-Ultra-253B-v1 is a model which offers a great tradeoff between model accuracy and efficiency. Efficiency (throughput) directly translates to savings. Using a novel Neural Architecture Search (NAS) approach, we greatly reduce the model's memory footprint, enabling larger workloads, as well as reducing the number of GPUs required to run the model in a data center environment. This NAS approach enables the selection of a desired point in the accuracy-efficiency tradeoff. Furthermore, by using a novel method to vertically compress the model (see details here), it also offers a significant improvement in latency.",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$0.80",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nvidia.svg",
+            "id": "nvidia/Llama-3.1-Nemotron-Ultra-253B-v1",
+            "inputRate": 0.4,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 16384,
+            "name": "Nvidia Nemotron Ultra 253B",
+            "outputRate": 0.8,
+            "provider": "nvidia"
+        },
+        {
+            "benchmark": {
+                "coding": 11.9,
+                "intelligence": 15.6,
+                "speed": 55.557
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-05-10",
+            "description": "Qwen25 VL 72b model with 32k context window",
+            "formattedInputRate": "$0.70",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen25-vl-72b-instruct",
+            "inputRate": 0.69989,
+            "maxInputTokens": 32000,
+            "maxOutputTokens": 32768,
+            "name": "Qwen25 VL 72b",
+            "outputRate": 0.69989,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 15.6,
+                "intelligence": 17.2,
+                "speed": 77.705
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-05-10",
+            "description": "32-B parameter reasoning model from DeepCogito (Qwen backbone) – strong general reasoning & coding at low price.",
+            "formattedInputRate": "$1.80",
+            "formattedOutputRate": "$1.80",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Alibaba.svg",
+            "id": "deepcogito/cogito-v1-preview-qwen-32B",
+            "inputRate": 1.7999999999999998,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 32768,
+            "name": "Cogito v1 Preview Qwen 32B",
+            "outputRate": 1.7999999999999998,
+            "provider": "alibaba"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 10.9,
+                "speed": null
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-05-10",
+            "description": "24-B parameter Mistral model fine-tuned by NousResearch for balanced reasoning & creativity.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$0.30",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nousresearch.svg",
+            "id": "NousResearch/DeepHermes-3-Mistral-24B-Preview",
+            "inputRate": 0.3,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 32768,
+            "name": "DeepHermes-3 Mistral 24B (Preview)",
+            "outputRate": 0.3,
+            "provider": "nousresearch"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 15.2,
+                "speed": 63.768
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-04-15",
+            "description": "QwQ is the reasoning model of the Qwen series. QwQ is capable of thinking and reasoning, can achieve significantly enhanced performance especially on hard problems.",
+            "formattedInputRate": "$0.26",
+            "formattedOutputRate": "$0.30",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwq-32b",
+            "inputRate": 0.25599999100000004,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 32768,
+            "name": "Qwen: QwQ 32B",
+            "outputRate": 0.304999992,
+            "provider": "qwen"
+        },
+        {
+            "capabilities": [
+                "pdf-upload"
+            ],
+            "category": "More",
+            "dateAdded": "2025-04-15",
+            "description": "Kimi Dev 72B is a 72B parameter model from Moonshot AI. 60.4% performance on SWE bench Verified, which is as of June 16th 2025 state of the art for open source models.",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/MoonshotAI.svg",
+            "id": "moonshotai/Kimi-Dev-72B",
+            "inputRate": 0.4,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 131072,
+            "name": "Kimi Dev 72B",
+            "outputRate": 0.4,
+            "provider": "moonshot"
+        },
+        {
+            "benchmark": {
+                "coding": 14.5,
+                "intelligence": 17.4,
+                "speed": 33.249
+            },
+            "capabilities": null,
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "2025-04-15",
+            "description": "Nvidia's latest Llama fine-tune optimized for instruction following. Early results hints that it might outperform models such as GPT-4o and Claude 3.5 Sonnet.",
+            "formattedInputRate": "$0.36",
+            "formattedOutputRate": "$0.41",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nvidia.svg",
+            "id": "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
+            "inputRate": 0.357,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 8192,
+            "name": "Nvidia Nemotron 70b",
+            "outputRate": 0.408,
+            "provider": "nvidia"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 8.4,
+                "speed": null
+            },
+            "capabilities": [
+                "pdf-upload",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-04-15",
+            "description": "Cheaper version of Deepseek V3/Chat. Note: may be routed through Deepseek itself. Quantized at FP8.",
+            "formattedInputRate": "$0.25",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-chat-cheaper",
+            "inputRate": 0.25,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "DeepSeek V3/Chat Cheaper",
+            "outputRate": 0.7,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 23.8,
+                "intelligence": 23.2,
+                "speed": 86.12
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-04-15",
+            "description": "GLM-4.5 is Z-AI's latest flagship foundation model, purpose-built for agent-based applications. It leverages a Mixture-of-Experts (MoE) architecture with 355B total / 32B active parameters and supports a context length of up to 128k tokens. GLM-4.5 delivers significantly enhanced capabilities in reasoning, code generation, and agent alignment.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.30",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/glm-4.5",
+            "inputRate": 0.3,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "GLM 4.5",
+            "outputRate": 1.3,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 23.8,
+                "intelligence": 23.2,
+                "speed": 86.12
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-04-15",
+            "description": "GLM-4.5-Air is a 106B total / 12B active parameter model designed to unify frontier reasoning, coding, and agentic capabilities. On the SWE-bench Verified benchmark, it delivers the best performance at its scale with a competitive performance-to-cost ratio.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.10",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/GLM-4.5-Air",
+            "inputRate": 0.1,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 98304,
+            "name": "GLM 4.5 Air",
+            "outputRate": 0.1,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 10.2,
+                "speed": 201.588
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-04-15",
+            "description": "Building upon Mistral Small 3 (2501), Mistral Small 3.1 (2503) adds state-of-the-art vision understanding and enhances long context capabilities up to 128k tokens without compromising text performance. With 24 billion parameters, this model achieves top-tier capabilities in both text and vision tasks.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.30",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistral-small-31-24b-instruct",
+            "inputRate": 0.1,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 131072,
+            "name": "Mistral Small 31 24b Instruct",
+            "outputRate": 0.3,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 13.3,
+                "intelligence": 15.1,
+                "speed": 188.759
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-04-15",
+            "description": "The latest iteration of Mistral Small, version 3.2 (2506) brings enhanced performance and capabilities. With 24 billion parameters, this model delivers state-of-the-art results across text generation tasks with improved efficiency.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.40",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "chutesai/Mistral-Small-3.2-24B-Instruct-2506",
+            "inputRate": 0.2,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 131072,
+            "name": "Mistral Small 3.2 24b Instruct",
+            "outputRate": 0.4,
+            "provider": "mistral"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-04-15",
+            "description": "A deep reasoning model with rumination capabilities (benchmarked against OpenAI's Deep Research). Employs longer periods of deep thought to solve more open-ended and complex problems (e.g., writing a comparative analysis of AI development in two cities and their future development plans). Integrates search tools during its deep thinking process.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "THUDM/GLM-Z1-Rumination-32B-0414",
+            "inputRate": 0.2,
+            "maxInputTokens": 32000,
+            "maxOutputTokens": 65536,
+            "name": "GLM Z1 Rumination 32B 0414",
+            "outputRate": 0.2,
+            "provider": "zhipu"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-04-15",
+            "description": "A reasoning model with deep thinking capabilities, based on GLM-4-32B-0414. Further trained on tasks involving mathematics, code, and logic. Significantly improves mathematical abilities and capability to solve complex tasks.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "THUDM/GLM-Z1-32B-0414",
+            "inputRate": 0.2,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "GLM Z1 32B 0414",
+            "outputRate": 0.2,
+            "provider": "zhipu"
+        },
+        {
+            "capabilities": null,
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "2025-04-13",
+            "description": "Veiled Calla 12B is a 12B parameter model that is a more advanced version of Calla 12B.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$0.30",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "soob3123/Veiled-Calla-12B",
+            "inputRate": 0.3,
+            "maxInputTokens": 32768,
+            "maxOutputTokens": 8192,
+            "name": "Veiled Calla 12B",
+            "outputRate": 0.3,
+            "provider": ""
+        },
+        {
+            "capabilities": [
+                "vision"
+            ],
+            "category": "More",
+            "dateAdded": "2025-03-28",
+            "description": "QvQ Max is the top model of the Qwen series. QvQ Max is capable of thinking and reasoning, can achieve significantly enhanced performance especially on hard problems.",
+            "formattedInputRate": "$1.26",
+            "formattedOutputRate": "$4.77",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qvq-max",
+            "inputRate": 1.26,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "Qwen: QvQ Max",
+            "outputRate": 4.77,
+            "provider": "qwen"
+        },
+        {
+            "capabilities": [
+                "vision-by-description",
+                "pdf-upload"
+            ],
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "2025-03-10",
+            "description": "TheDrummer's Skyfall 36B V2, a 36B parameter model with a focus on high quality and consistency.",
+            "formattedInputRate": "$0.49",
+            "formattedOutputRate": "$0.49",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "thedrummer/skyfall-36b-v2",
+            "inputRate": 0.49299999999999994,
+            "maxInputTokens": 64000,
+            "maxOutputTokens": 32768,
+            "name": "TheDrummer Skyfall 36B V2",
+            "outputRate": 0.49299999999999994,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 34.6,
+                "intelligence": 32.1,
+                "speed": 24.66
+            },
+            "capabilities": [
+                "pdf-upload",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-02-27",
+            "description": "DeepSeek original V3 model, trained on nearly 15 trillion tokens, matches leading closed-source models at a far lower price. Quantized at FP8.",
+            "formattedInputRate": "$0.25",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-chat",
+            "inputRate": 0.25,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "DeepSeek V3/Deepseek Chat",
+            "outputRate": 0.7,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 13.3,
+                "intelligence": 12.5,
+                "speed": 57.523
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-02-27",
+            "description": "Qwen 3 30b A3B is a 30b model with 3 billion active parameters per pass. Supports switching between thinking and non thinking: trigger thinking with /think and /no_think anywhere in a prompt or system message to toggle chain-of-thought reasoning.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.30",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwen3-30b-a3b",
+            "inputRate": 0.1,
+            "maxInputTokens": 41000,
+            "maxOutputTokens": 32768,
+            "name": "Qwen3 30B A3B",
+            "outputRate": 0.3,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 15.2,
+                "speed": 63.768
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-02-27",
+            "description": "Experimental release of Qwen's reasoning model. Great at coding and math, but still in development so may exhibit odd bugs. Not production-ready.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.20",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwq-32b-preview",
+            "inputRate": 0.2,
+            "maxInputTokens": 32768,
+            "maxOutputTokens": 32768,
+            "name": "Qwen QwQ 32B Preview",
+            "outputRate": 0.2,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 10.7,
+                "intelligence": 14.5,
+                "speed": 99.542
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "2025-02-27",
+            "description": "Llama 3.3 is optimized for multilingual dialogue use cases and outperforms many of the available open source and closed chat models on common industry benchmarks.",
+            "formattedInputRate": "$0.05",
+            "formattedOutputRate": "$0.23",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Meta.svg",
+            "id": "meta-llama/llama-3.3-70b-instruct",
+            "inputRate": 0.05,
+            "maxInputTokens": 131072,
+            "maxOutputTokens": 16384,
+            "name": "Llama 3.3 70b Instruct",
+            "outputRate": 0.23,
+            "provider": "meta"
+        },
+        {
+            "capabilities": null,
+            "category": "Uncensored",
+            "dateAdded": "2025-02-27",
+            "description": "Dolphin is the most uncensored model yet, built on top of Qwen's 72b model.",
+            "formattedInputRate": "$0.31",
+            "formattedOutputRate": "$0.31",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Alibaba.svg",
+            "id": "cognitivecomputations/dolphin-2.9.2-qwen2-72b",
+            "inputRate": 0.306,
+            "maxInputTokens": 8192,
+            "maxOutputTokens": 4096,
+            "name": "Dolphin 72b",
+            "outputRate": 0.306,
+            "provider": "alibaba"
+        },
+        {
+            "benchmark": {
+                "coding": 22.1,
+                "intelligence": 25,
+                "speed": 67.984
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "2025-02-20",
+            "description": "Qwen3-30B-A3B-Instruct-2507 is a 30.5B-parameter mixture-of-experts language model from Qwen, with 3.3B active parameters per inference. Significant improvements in general capabilities, including instruction following, logical reasoning, text comprehension, mathematics, science, coding and tool usage.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.50",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen3-30b-a3b-instruct-2507",
+            "inputRate": 0.2,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 32768,
+            "name": "Qwen3 30B A3B Instruct 2507",
+            "outputRate": 0.5,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 24.6,
+                "intelligence": 24.8,
+                "speed": 66.24
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Qwen 3 Coder 480B, a 480 billion total parameter model with 35B active, and 160 total experts with 8 active. Performs similar to Claude 4 Sonnet in coding benchmarks, but does so at a much lower price.",
+            "formattedInputRate": "$0.13",
+            "formattedOutputRate": "$0.50",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwen3-coder",
+            "inputRate": 0.12999999999999998,
+            "maxInputTokens": 262000,
+            "maxOutputTokens": 65536,
+            "name": "Qwen 3 Coder 480B",
+            "outputRate": 0.5,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 24,
+                "intelligence": 27.1,
+                "speed": null
+            },
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "The new (May 28th) Deepseek R1 model.",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$1.70",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-ai/DeepSeek-R1-0528",
+            "inputRate": 0.4,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 163840,
+            "name": "DeepSeek R1 0528",
+            "outputRate": 1.7,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 22.1,
+                "intelligence": 26.3,
+                "speed": 42.483
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Kimi K2 0905. Kimi-k2 is a Mixture-of-Experts (MoE) foundation model with exceptional coding and agent capabilities, featuring 1 trillion total parameters and 32 billion activated parameters. In benchmark evaluations covering general knowledge reasoning, programming, mathematics, and agent-related tasks, the K2 model outperforms other leading open-source models. Quantized at FP8.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$2.00",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/MoonshotAI.svg",
+            "id": "moonshotai/kimi-k2-instruct",
+            "inputRate": 0.1,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 8192,
+            "name": "Kimi K2 Instruct",
+            "outputRate": 2,
+            "provider": "moonshot"
+        },
+        {
+            "benchmark": {
+                "coding": 22.1,
+                "intelligence": 26.3,
+                "speed": 42.483
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Kimi K2 0711 version. Kimi-k2 is a Mixture-of-Experts (MoE) foundation model with exceptional coding and agent capabilities, featuring 1 trillion total parameters and 32 billion activated parameters. In benchmark evaluations covering general knowledge reasoning, programming, mathematics, and agent-related tasks, the K2 model outperforms other leading open-source models. Quantized at FP8.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$2.00",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/MoonshotAI.svg",
+            "id": "moonshotai/kimi-k2-instruct-0711",
+            "inputRate": 0.1,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "Kimi K2 0711",
+            "outputRate": 2,
+            "provider": "moonshot"
+        },
+        {
+            "benchmark": {
+                "coding": 16,
+                "intelligence": 18.6,
+                "speed": 34.324
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Hermes 4 Large with thinking enabled. Streams visible reasoning before the final answer.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "nousresearch/hermes-4-405b:thinking",
+            "inputRate": 0.3,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "Hermes 4 Large (Thinking)",
+            "outputRate": 1.2,
+            "provider": ""
+        },
+        {
+            "benchmark": {
+                "coding": 24,
+                "intelligence": 27.1,
+                "speed": null
+            },
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "DeepSeek's R1 is a thinking model, scoring very well on all benchmarks at low cost. This version is run via open-source providers, never routing through DeepSeek themselves.",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$1.70",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-r1",
+            "inputRate": 0.4,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "DeepSeek R1",
+            "outputRate": 1.7,
+            "provider": "deepseek"
+        },
+        {
+            "capabilities": [
+                "vision-by-description",
+                "pdf-upload"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "MiniMax's flagship model with a 1M token context window",
+            "formattedInputRate": "$0.14",
+            "formattedOutputRate": "$1.12",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Minimax.svg",
+            "id": "minimax/minimax-01",
+            "inputRate": 0.1394,
+            "maxInputTokens": 1000192,
+            "maxOutputTokens": 16384,
+            "name": "MiniMax 01",
+            "outputRate": 1.1219999999999999,
+            "provider": "minimax"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 14.5,
+                "speed": 78.281
+            },
+            "capabilities": [
+                "vision-by-description",
+                "pdf-upload"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Qwen 3 32b is a 32b model. Supports switching between thinking and non thinking: trigger thinking with /think and /no_think anywhere in a prompt or system message to toggle chain-of-thought reasoning.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.30",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwen3-32b",
+            "inputRate": 0.1,
+            "maxInputTokens": 41000,
+            "maxOutputTokens": 32768,
+            "name": "Qwen 3 32b",
+            "outputRate": 0.3,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 12.4,
+                "intelligence": 12.8,
+                "speed": 63.654
+            },
+            "capabilities": [
+                "vision-by-description"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Qwen 3 14b is a 14b model. Supports switching between thinking and non thinking: trigger thinking with /think and /no_think anywhere in a prompt or system message to toggle chain-of-thought reasoning.",
+            "formattedInputRate": "$0.08",
+            "formattedOutputRate": "$0.24",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwen3-14b",
+            "inputRate": 0.08,
+            "maxInputTokens": 41000,
+            "maxOutputTokens": 32768,
+            "name": "Qwen 3 14b",
+            "outputRate": 0.24000000000000002,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 19.5,
+                "intelligence": 26.7,
+                "speed": 139.69
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Qwen3 Next 80B A3B (Thinking)",
+            "formattedInputRate": "$0.15",
+            "formattedOutputRate": "$0.65",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "qwen/qwen3-next-80b-a3b-thinking",
+            "inputRate": 0.15,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 32768,
+            "name": "Qwen3 Next 80B A3B (Thinking)",
+            "outputRate": 0.65,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 30,
+                "intelligence": 28.4,
+                "speed": 24.911
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Deepseek V3.2 Exp, Deepseek's latest model offering far better performance especially on longer contexts than its predecessors. Current flagship model by Deepseek. FP8.",
+            "formattedInputRate": "$0.28",
+            "formattedOutputRate": "$0.42",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-ai/deepseek-v3.2-exp",
+            "inputRate": 0.27999999999999997,
+            "maxInputTokens": 163840,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek V3.2 Exp",
+            "outputRate": 0.42000000000000004,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 33.3,
+                "intelligence": 32.9,
+                "speed": 24.47
+            },
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Deepseek V3.2 Exp Thinking, Deepseek's latest model offering far better performance especially on longer contexts than its predecessors. Current flagship model by Deepseek. FP8.",
+            "formattedInputRate": "$0.28",
+            "formattedOutputRate": "$0.42",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-ai/deepseek-v3.2-exp-thinking",
+            "inputRate": 0.27999999999999997,
+            "maxInputTokens": 163840,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek V3.2 Exp Thinking",
+            "outputRate": 0.42000000000000004,
+            "provider": "deepseek"
+        },
+        {
+            "capabilities": [
+                "pdf-upload"
+            ],
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "",
+            "description": "Upgraded model of Magnum V2 72B. From the creators of Goliath. Aimed at top-tier prose quality, trained on 55 million tokens of curated roleplay data.",
+            "formattedInputRate": "$2.01",
+            "formattedOutputRate": "$2.99",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "anthracite-org/magnum-v4-72b",
+            "inputRate": 2.006,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 8192,
+            "name": "Magnum v4 72B",
+            "outputRate": 2.992,
+            "provider": "other"
+        },
+        {
+            "benchmark": {
+                "coding": 7.1,
+                "intelligence": 10.6,
+                "speed": 94.111
+            },
+            "capabilities": [
+                "vision-by-description"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Qwen 3 8B is a 8B model. Supports switching between thinking and non thinking: trigger thinking with /think and /no_think anywhere in a prompt or system message to toggle chain-of-thought reasoning.",
+            "formattedInputRate": "$0.47",
+            "formattedOutputRate": "$0.47",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "Qwen/Qwen3-8B",
+            "inputRate": 0.4699999999999999,
+            "maxInputTokens": 41000,
+            "maxOutputTokens": 32768,
+            "name": "Qwen 3 8B",
+            "outputRate": 0.4699999999999999,
+            "provider": "qwen"
+        },
+        {
+            "benchmark": {
+                "coding": 29.7,
+                "intelligence": 27.7,
+                "speed": null
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Thinking enabled version of Deepseek V3.1. DeepSeek-V3.1 is a hybrid model that supports both thinking mode and non-thinking mode. It does better at tool calling and agent tasks, and has higher thinking efficiency than its predecessor. Quantized at FP8.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-ai/DeepSeek-V3.1:thinking",
+            "inputRate": 0.2,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek V3.1 Thinking",
+            "outputRate": 0.7,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 33.7,
+                "intelligence": 33.9,
+                "speed": null
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Thinking-enabled DeepSeek-V3.1-Terminus with improved language consistency, upgraded Code/Search Agents, and stronger stability and reliability versus V3.1. FP8.",
+            "formattedInputRate": "$0.25",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-ai/DeepSeek-V3.1-Terminus:thinking",
+            "inputRate": 0.25,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek V3.1 Terminus (Thinking)",
+            "outputRate": 0.7,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 22,
+                "intelligence": 22.3,
+                "speed": null
+            },
+            "capabilities": [
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "DeepSeek V3 0324, DeepSeek's 03 March 2025 V3 model, optimized for general-purpose tasks. Quantized at FP8.",
+            "formattedInputRate": "$0.25",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-v3-0324",
+            "inputRate": 0.25,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "DeepSeek Chat 0324",
+            "outputRate": 0.7,
+            "provider": "deepseek"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Deprecated. This model now routes to Kimi K2 0711.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$2.00",
+            "hasAlternateProviders": true,
+            "iconUrl": "/icons/MoonshotAI.svg",
+            "id": "baseten/Kimi-K2-Instruct-FP4",
+            "inputRate": 0.1,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 131072,
+            "name": "Kimi K2 0711 Instruct FP4",
+            "outputRate": 2,
+            "provider": "moonshot"
+        },
+        {
+            "benchmark": {
+                "coding": 26.3,
+                "intelligence": 26.4,
+                "speed": 40.911
+            },
+            "capabilities": [
+                "reasoning"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "GLM-4.5 with thinking mode for enhanced reasoning; provides chain-of-thought style internal reasoning with a 128k context window.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.30",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/GLM-4.5:thinking",
+            "inputRate": 0.3,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "GLM 4.5 (Thinking)",
+            "outputRate": 1.3,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 23.8,
+                "intelligence": 23.2,
+                "speed": 86.12
+            },
+            "capabilities": [
+                "reasoning",
+                "tool-calling",
+                "structured-output"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "GLM-4.5-Air with thinking mode enabled for enhanced reasoning capabilities. Shows step-by-step thought process.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.10",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "zai-org/GLM-4.5-Air:thinking",
+            "inputRate": 0.1,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 98304,
+            "name": "GLM 4.5 Air (Thinking)",
+            "outputRate": 0.1,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": 14.5,
+                "intelligence": 17.4,
+                "speed": 33.249
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Fast and efficient for simple purposes.",
+            "formattedInputRate": "$0.05",
+            "formattedOutputRate": "$0.05",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Meta.svg",
+            "id": "meta-llama/llama-3.1-8b-instruct",
+            "inputRate": 0.0544,
+            "maxInputTokens": 131072,
+            "maxOutputTokens": 16384,
+            "name": "Llama 3.1 8b Instruct",
+            "outputRate": 0.0544,
+            "provider": "meta"
+        },
+        {
+            "capabilities": [
+                "pdf-upload"
+            ],
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "",
+            "description": "A recreation trial of the original MythoMax-L2-B13 but merged with updated models.",
+            "formattedInputRate": "$0.80",
+            "formattedOutputRate": "$1.21",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "undi95/remm-slerp-l2-13b",
+            "inputRate": 0.7989999999999999,
+            "maxInputTokens": 6144,
+            "maxOutputTokens": 4096,
+            "name": "ReMM SLERP 13B",
+            "outputRate": 1.2069999999999999,
+            "provider": "other"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Powered by Mistral-7B-v0.2, best used for large batch processing tasks where cost is a significant factor but reasoning capabilities are not crucial.",
+            "formattedInputRate": "$0.25",
+            "formattedOutputRate": "$0.25",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/mistral-tiny",
+            "inputRate": 0.25499999999999995,
+            "maxInputTokens": 32000,
+            "maxOutputTokens": 8192,
+            "name": "Mistral Tiny",
+            "outputRate": 0.25499999999999995,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 12.1,
+                "speed": null
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Mistral Saba is a 24B-parameter language model specifically designed for the Middle East and South Asia, delivering accurate and contextually relevant responses while maintaining efficient performance. Trained on curated regional datasets, it supports multiple Indian-origin languages—including Tamil and Malayalam—alongside Arabic. This makes it a versatile option for a range of regional and multilingual applications. ",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.59",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/mistral-saba",
+            "inputRate": 0.1989,
+            "maxInputTokens": 32000,
+            "maxOutputTokens": 32768,
+            "name": "Mistral Saba",
+            "outputRate": 0.595,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 7.4,
+                "speed": 172.225
+            },
+            "capabilities": [
+                "pdf-upload"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Optimized for speed with decent context length",
+            "formattedInputRate": "$0.05",
+            "formattedOutputRate": "$0.05",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/mistral-7b-instruct",
+            "inputRate": 0.0544,
+            "maxInputTokens": 32768,
+            "maxOutputTokens": 8192,
+            "name": "Mistral 7B Instruct",
+            "outputRate": 0.0544,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 25.8,
+                "intelligence": 30.4,
+                "speed": 129.3
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Xiaomi MiMo V2 Flash is a 309B parameter Mixture-of-Experts model (15B active) optimized for high-speed reasoning and agentic workflows. Features a hybrid attention architecture with sliding window and global attention for efficient long-context processing, plus native Multi-Token Prediction for faster inference. Routed only via open source providers.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.31",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "xiaomi/mimo-v2-flash",
+            "inputRate": 0.102,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 32768,
+            "name": "MiMo V2 Flash",
+            "outputRate": 0.306,
+            "provider": "xiaomi"
+        },
+        {
+            "benchmark": {
+                "coding": 31.8,
+                "intelligence": 39.2,
+                "speed": 133.855
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Xiaomi MiMo V2 Flash with explicit thinking mode enabled. Shows the model's reasoning process before responses. Same 309B MoE architecture (15B active) as the base model, but outputs thinking/reasoning tokens for transparency. Best for complex reasoning tasks where you want to see the model's thought process. Routed only via open source providers.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.31",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "xiaomi/mimo-v2-flash-thinking",
+            "inputRate": 0.102,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 32768,
+            "name": "MiMo V2 Flash (Thinking)",
+            "outputRate": 0.306,
+            "provider": "xiaomi"
+        },
+        {
+            "benchmark": {
+                "coding": 25.8,
+                "intelligence": 30.4,
+                "speed": 129.3
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Xiaomi MiMo V2 Flash is a 309B parameter Mixture-of-Experts model (15B active) optimized for high-speed reasoning and agentic workflows. Features a hybrid attention architecture with sliding window and global attention for efficient long-context processing, plus native Multi-Token Prediction for faster inference. Routed directly to Xiaomi, so no logging guarantees may be limited.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.31",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "xiaomi/mimo-v2-flash-original",
+            "inputRate": 0.102,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 32768,
+            "name": "MiMo V2 Flash Original",
+            "outputRate": 0.306,
+            "provider": "xiaomi"
+        },
+        {
+            "benchmark": {
+                "coding": 31.8,
+                "intelligence": 39.2,
+                "speed": 133.855
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Xiaomi MiMo V2 Flash with explicit thinking mode enabled. Shows the model's reasoning process before responses. Same 309B MoE architecture (15B active) as the base model, but outputs thinking/reasoning tokens for transparency. Best for complex reasoning tasks where you want to see the model's thought process. Routed directly to Xiaomi, so no logging guarantees may be limited.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.31",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "xiaomi/mimo-v2-flash-thinking-original",
+            "inputRate": 0.102,
+            "maxInputTokens": 256000,
+            "maxOutputTokens": 32768,
+            "name": "MiMo V2 Flash (Thinking) Original",
+            "outputRate": 0.306,
+            "provider": "xiaomi"
+        },
+        {
+            "benchmark": {
+                "coding": 14.5,
+                "intelligence": 17.4,
+                "speed": 33.249
+            },
+            "capabilities": null,
+            "category": "Uncensored",
+            "dateAdded": "",
+            "description": "An abliterated (removed restrictions and censorship) version of Llama 3.1 70b Nemotron.",
+            "formattedInputRate": "$0.70",
+            "formattedOutputRate": "$0.70",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nvidia.svg",
+            "id": "huihui-ai/Llama-3.1-Nemotron-70B-Instruct-HF-abliterated",
+            "inputRate": 0.7,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 16384,
+            "name": "Nemotron 3.1 70B abliterated",
+            "outputRate": 0.7,
+            "provider": "nvidia"
+        },
+        {
+            "capabilities": null,
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "",
+            "description": "Magnum V2 72B",
+            "formattedInputRate": "$2.01",
+            "formattedOutputRate": "$2.99",
+            "hasAlternateProviders": false,
+            "iconUrl": "",
+            "id": "anthracite-org/magnum-v2-72b",
+            "inputRate": 2.006,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 8192,
+            "name": "Magnum V2 72B",
+            "outputRate": 2.992,
+            "provider": "other"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 9.8,
+                "speed": null
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "12B parameter model with multilingual support.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.12",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "mistralai/Mistral-Nemo-Instruct-2407",
+            "inputRate": 0.1003,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 8192,
+            "name": "Mistral Nemo",
+            "outputRate": 0.1207,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 24,
+                "intelligence": 27.1,
+                "speed": null
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "DeepSeek-R1 is now live and open source, rivaling OpenAI's Model o1.",
+            "formattedInputRate": "$0.40",
+            "formattedOutputRate": "$1.70",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/DeepSeek.svg",
+            "id": "deepseek-reasoner",
+            "inputRate": 0.4,
+            "maxInputTokens": 64000,
+            "maxOutputTokens": 65536,
+            "name": "DeepSeek Reasoner",
+            "outputRate": 1.7,
+            "provider": "deepseek"
+        },
+        {
+            "benchmark": {
+                "coding": 0.2,
+                "intelligence": 5.5,
+                "speed": 53.767
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Gemma 3 has a large, 128K context window, multilingual support in over 140 languages, and is available in more sizes than previous versions.",
+            "formattedInputRate": "$0.10",
+            "formattedOutputRate": "$0.10",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Gemini.svg",
+            "id": "unsloth/gemma-3-1b-it",
+            "inputRate": 0.1003,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 8192,
+            "name": "Gemma 3 1B IT",
+            "outputRate": 0.1003,
+            "provider": "gemini"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "26B sparse MoE with 3B active parameters. 128K context, native function calling, and structured outputs. Apache 2.0 licensed.",
+            "formattedInputRate": "$0.05",
+            "formattedOutputRate": "$0.15",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Arcee.svg",
+            "id": "arcee-ai/trinity-mini",
+            "inputRate": 0.045000000000000005,
+            "maxInputTokens": 131072,
+            "maxOutputTokens": null,
+            "name": "Trinity Mini",
+            "outputRate": 0.15,
+            "provider": "arcee"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "400B sparse MoE with 13B active parameters. 256 experts, 128K context. Trained on 17T tokens with strong reasoning and coding capabilities.",
+            "formattedInputRate": "$0.25",
+            "formattedOutputRate": "$1.00",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Arcee.svg",
+            "id": "arcee-ai/trinity-large",
+            "inputRate": 0.25,
+            "maxInputTokens": 131072,
+            "maxOutputTokens": null,
+            "name": "Trinity Large",
+            "outputRate": 1,
+            "provider": "arcee"
+        },
+        {
+            "benchmark": {
+                "coding": 16.5,
+                "intelligence": 20.8,
+                "speed": 60.761
+            },
+            "capabilities": [
+                "vision"
+            ],
+            "category": "More",
+            "dateAdded": "",
+            "description": "Qwen3 Vision‑Language model (235B MoE, ≈22B active) tuned for instruction following and grounded visual QA. Excels at image understanding, dense OCR, charts/diagrams, and multi‑image context.",
+            "formattedInputRate": "$0.30",
+            "formattedOutputRate": "$1.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Qwen.svg",
+            "id": "Qwen/Qwen3-VL-235B-A22B-Instruct",
+            "inputRate": 0.3,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 262144,
+            "name": "Qwen3 VL 235B A22B Instruct",
+            "outputRate": 1.2,
+            "provider": "qwen"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "9B small-sized model maintaining the open-source tradition. Despite its smaller scale, GLM-Z1-9B-0414 still exhibits excellent capabilities in mathematical reasoning and general tasks. Its overall performance is already at a leading level among open-source models of the same size.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "THUDM/GLM-Z1-9B-0414",
+            "inputRate": 0.2,
+            "maxInputTokens": 32000,
+            "maxOutputTokens": 8000,
+            "name": "GLM Z1 9B 0414",
+            "outputRate": 0.2,
+            "provider": "zhipu"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "A 9B parameter version of the GLM-4 series, offering a balance of performance and efficiency.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "THUDM/GLM-4-9B-0414",
+            "inputRate": 0.2,
+            "maxInputTokens": 32000,
+            "maxOutputTokens": 8000,
+            "name": "GLM 4 9B 0414",
+            "outputRate": 0.2,
+            "provider": "zhipu"
+        },
+        {
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Features 32 billion parameters. Performance is comparable to OpenAI's GPT series and DeepSeek's V3/R1 series. Pre-trained on 15T of high-quality data, including reasoning-type synthetic data. Enhanced performance in instruction following, engineering code, and function calling.",
+            "formattedInputRate": "$0.20",
+            "formattedOutputRate": "$0.20",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Zhipu.svg",
+            "id": "THUDM/GLM-4-32B-0414",
+            "inputRate": 0.2,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 65536,
+            "name": "GLM 4 32B 0414",
+            "outputRate": 0.2,
+            "provider": "zhipu"
+        },
+        {
+            "benchmark": {
+                "coding": null,
+                "intelligence": 9.8,
+                "speed": null
+            },
+            "capabilities": [
+                "pdf-upload"
+            ],
+            "category": "Roleplay/storytelling models",
+            "dateAdded": "",
+            "description": "Mistral Nemo 12B Instruct 2407",
+            "formattedInputRate": "$0.01",
+            "formattedOutputRate": "$0.01",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Mistral.svg",
+            "id": "Mistral-Nemo-12B-Instruct-2407",
+            "inputRate": 0.01,
+            "maxInputTokens": 16384,
+            "maxOutputTokens": 16384,
+            "name": "Mistral Nemo 12B Instruct 2407",
+            "outputRate": 0.01,
+            "provider": "mistral"
+        },
+        {
+            "benchmark": {
+                "coding": 7.5,
+                "intelligence": 13.2,
+                "speed": 137.183
+            },
+            "capabilities": null,
+            "category": "More",
+            "dateAdded": "",
+            "description": "Nvidia's efficient 9B parameter model optimized for speed and cost. Nemotron Nano v2 offers excellent performance for its size with enhanced instruction following capabilities.",
+            "formattedInputRate": "$0.17",
+            "formattedOutputRate": "$0.68",
+            "hasAlternateProviders": false,
+            "iconUrl": "/icons/Nvidia.svg",
+            "id": "nvidia/nvidia-nemotron-nano-9b-v2",
+            "inputRate": 0.17,
+            "maxInputTokens": 128000,
+            "maxOutputTokens": 16384,
+            "name": "Nvidia Nemotron Nano 9B v2",
+            "outputRate": 0.68,
+            "provider": "nvidia"
+        }
+    ]
+}

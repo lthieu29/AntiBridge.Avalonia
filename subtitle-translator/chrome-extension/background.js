@@ -81,6 +81,9 @@ chrome.runtime.onConnect.addListener((port) => {
         if (message.type === 'TRANSLATE_BRIDGE') {
             handleBridgeTranslation(port, message);
         }
+        if (message.type === 'TRANSLATE_OPENAI') {
+            handleOpenAiTranslation(port, message);
+        }
     });
 
     port.onDisconnect.addListener(() => {
@@ -109,6 +112,33 @@ function handleApiTranslation(port, message) {
         try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt }); } catch (e) {}
     }).catch(err => {
         console.error('[BG] TRANSLATE_API error:', err);
+        try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
+    }).finally(() => {
+        try { port.disconnect(); } catch (e) {}
+    });
+}
+
+/**
+ * OpenAI mode: dịch qua OpenAI-compatible API
+ */
+function handleOpenAiTranslation(port, message) {
+    const { vttContent, settings } = message;
+    console.log(`[BG] TRANSLATE_OPENAI via port: ${vttContent.length} chars → ${settings.openaiUrl}`);
+
+    globalThis.ApiTranslator.translateVttViaOpenAi(
+        vttContent,
+        {
+            openaiUrl: settings.openaiUrl,
+            openaiKey: settings.openaiKey,
+            chunkSize: settings.chunkSize || 20,
+        },
+        (progress) => {
+            try { port.postMessage({ type: 'TRANSLATE_PROGRESS', progress }); } catch (e) {}
+        }
+    ).then(translatedVtt => {
+        try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt }); } catch (e) {}
+    }).catch(err => {
+        console.error('[BG] TRANSLATE_OPENAI error:', err);
         try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
     }).finally(() => {
         try { port.disconnect(); } catch (e) {}

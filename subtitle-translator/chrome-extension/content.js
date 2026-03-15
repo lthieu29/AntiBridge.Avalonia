@@ -17,18 +17,21 @@ let currentVttUrl = null;
 let panelElement = null;
 let isTranslating = false;
 
-// Settings (loaded from localStorage)
+// Settings
 const SETTINGS_KEY = 'ust_settings';
+const SECURE_KEYS_KEY = 'ust_secure_keys'; // chrome.storage.local
 let currentSettings = {
-    translationMode: 'api',
-    apiKey: '',
+    translationMode: 'openai',
+    apiKey: '',           // 1min.ai key (stored in chrome.storage)
     apiModel: 'deepseek-chat',
+    openaiUrl: 'http://dunremote.fastddns.org:10100',
+    openaiKey: '',        // OpenAI key (stored in chrome.storage)
     chunkSize: 20,
     bridgeUrl: DEFAULT_BRIDGE_URL,
 };
 
 /**
- * Load settings from localStorage
+ * Load settings: non-sensitive from localStorage, API keys from chrome.storage.local
  */
 function loadSettings() {
     try {
@@ -36,19 +39,40 @@ function loadSettings() {
         if (saved) {
             Object.assign(currentSettings, JSON.parse(saved));
         }
-        console.log(`[UST] Settings loaded: mode=${currentSettings.translationMode}, model=${currentSettings.apiModel}`);
     } catch (e) {
         console.warn('[UST] Failed to load settings:', e);
     }
+    // Load API keys from secure storage (async)
+    chrome.storage.local.get(SECURE_KEYS_KEY, (result) => {
+        if (result[SECURE_KEYS_KEY]) {
+            const keys = result[SECURE_KEYS_KEY];
+            if (keys.apiKey) currentSettings.apiKey = keys.apiKey;
+            if (keys.openaiKey) currentSettings.openaiKey = keys.openaiKey;
+        }
+        console.log(`[UST] Settings loaded: mode=${currentSettings.translationMode}, model=${currentSettings.apiModel}`);
+    });
 }
 
 /**
- * Save settings to localStorage
+ * Save settings: non-sensitive to localStorage, API keys to chrome.storage.local
  */
 function saveSettings() {
     try {
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(currentSettings));
-        console.log('[UST] Settings saved');
+        // Non-sensitive settings → localStorage
+        const nonSensitive = { ...currentSettings };
+        delete nonSensitive.apiKey;
+        delete nonSensitive.openaiKey;
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(nonSensitive));
+
+        // API keys → chrome.storage.local (Udemy không đọc được)
+        chrome.storage.local.set({
+            [SECURE_KEYS_KEY]: {
+                apiKey: currentSettings.apiKey,
+                openaiKey: currentSettings.openaiKey,
+            }
+        });
+
+        console.log('[UST] Settings saved (keys in secure storage)');
     } catch (e) {
         console.warn('[UST] Failed to save settings:', e);
     }
@@ -182,11 +206,25 @@ function createTranslatePanel() {
             <div class="ust-field">
                 <label class="ust-label">Translation Mode</label>
                 <div class="ust-radio-group">
-                    <label class="ust-radio"><input type="radio" name="ust-mode" value="api" id="ust-mode-api"> 🚀 API Direct <small>(nhanh, tốn credits)</small></label>
-                    <label class="ust-radio"><input type="radio" name="ust-mode" value="bridge" id="ust-mode-bridge"> 🌉 Bridge Server <small>(miễn phí, chậm)</small></label>
+                    <label class="ust-radio"><input type="radio" name="ust-mode" value="openai" id="ust-mode-openai"> 🤖 OpenAI API <small>(deepseek-v3.2)</small></label>
+                    <label class="ust-radio"><input type="radio" name="ust-mode" value="api" id="ust-mode-api"> 🚀 1min.ai <small>(nhiều model)</small></label>
+                    <label class="ust-radio"><input type="radio" name="ust-mode" value="bridge" id="ust-mode-bridge"> 🌉 Bridge Server <small>(miễn phí)</small></label>
                 </div>
             </div>
-            <div id="ust-api-fields">
+            <div id="ust-openai-fields">
+                <div class="ust-field">
+                    <label class="ust-label">🌐 Server URL</label>
+                    <input type="text" id="ust-openai-url" class="ust-input" value="http://dunremote.fastddns.org:10100">
+                </div>
+                <div class="ust-field">
+                    <label class="ust-label">🔑 API Key <small>(nếu cần)</small></label>
+                    <input type="password" id="ust-openai-key" class="ust-input" placeholder="Bearer key (optional)">
+                </div>
+                <div class="ust-field">
+                    <label class="ust-label">📌 Model: <code>deepseek/deepseek-v3.2</code> (cố định)</label>
+                </div>
+            </div>
+            <div id="ust-api-fields" style="display:none;">
                 <div class="ust-field">
                     <label class="ust-label">🔑 API Key</label>
                     <input type="password" id="ust-api-key" class="ust-input" placeholder="Nhập 1min.ai API key...">
@@ -194,12 +232,12 @@ function createTranslatePanel() {
                 <div class="ust-field">
                     <label class="ust-label">🤖 Model</label>
                     <select id="ust-api-model" class="ust-input">
-                        <option value="deepseek-chat">DeepSeek Chat — $0.14/M (rẻ nhất)</option>
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash — $0.10/M</option>
-                        <option value="gpt-4o-mini">GPT-4o Mini — $0.15/M</option>
-                        <option value="qwen-plus">Qwen Plus — $0.32/M</option>
-                        <option value="gpt-4o">GPT-4o — $2.50/M (premium)</option>
-                        <option value="claude-3.5-sonnet">Claude 3.5 Sonnet — $3.00/M</option>
+                        <option value="deepseek-chat">DeepSeek Chat</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                        <option value="qwen-plus">Qwen Plus</option>
+                        <option value="gpt-4o">GPT-4o</option>
+                        <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
                     </select>
                 </div>
             </div>
@@ -252,27 +290,38 @@ function createTranslatePanel() {
 
     // Event: Save settings
     document.getElementById('ust-save-settings').addEventListener('click', () => {
-        const mode = document.getElementById('ust-mode-api').checked ? 'api' : 'bridge';
+        let mode = 'openai';
+        if (document.getElementById('ust-mode-api').checked) mode = 'api';
+        if (document.getElementById('ust-mode-bridge').checked) mode = 'bridge';
+
         const apiKey = document.getElementById('ust-api-key').value.trim();
         const apiModel = document.getElementById('ust-api-model').value;
+        const openaiUrl = document.getElementById('ust-openai-url').value.trim();
+        const openaiKey = document.getElementById('ust-openai-key').value.trim();
         const bridgeUrl = document.getElementById('ust-bridge-url').value.trim() || DEFAULT_BRIDGE_URL;
 
         if (mode === 'api' && !apiKey) {
             const info = document.getElementById('ust-settings-info');
-            if (info) { info.textContent = '⚠️ Vui lòng nhập API Key'; info.className = 'ust-info ust-info-err'; }
+            if (info) { info.textContent = '⚠️ Vui lòng nhập 1min.ai API Key'; info.className = 'ust-info ust-info-err'; }
+            return;
+        }
+        if (mode === 'openai' && !openaiUrl) {
+            const info = document.getElementById('ust-settings-info');
+            if (info) { info.textContent = '⚠️ Vui lòng nhập Server URL'; info.className = 'ust-info ust-info-err'; }
             return;
         }
 
         currentSettings.translationMode = mode;
         currentSettings.apiKey = apiKey;
         currentSettings.apiModel = apiModel;
+        currentSettings.openaiUrl = openaiUrl;
+        currentSettings.openaiKey = openaiKey;
         currentSettings.bridgeUrl = bridgeUrl;
         saveSettings();
 
         const info = document.getElementById('ust-settings-info');
         if (info) { info.textContent = '✅ Đã lưu!'; info.className = 'ust-info ust-info-ok'; }
 
-        // Quay lại main view sau 500ms
         setTimeout(() => showMainView(), 500);
     });
 
@@ -282,12 +331,14 @@ function createTranslatePanel() {
     });
 
     // Event: Mode radio toggle
+    function updateModeFields() {
+        const mode = document.querySelector('input[name="ust-mode"]:checked')?.value || 'openai';
+        document.getElementById('ust-openai-fields').style.display = mode === 'openai' ? 'block' : 'none';
+        document.getElementById('ust-api-fields').style.display = mode === 'api' ? 'block' : 'none';
+        document.getElementById('ust-bridge-fields').style.display = mode === 'bridge' ? 'block' : 'none';
+    }
     document.querySelectorAll('input[name="ust-mode"]').forEach(radio => {
-        radio.addEventListener('change', () => {
-            const isApi = document.getElementById('ust-mode-api').checked;
-            document.getElementById('ust-api-fields').style.display = isApi ? 'block' : 'none';
-            document.getElementById('ust-bridge-fields').style.display = isApi ? 'none' : 'block';
-        });
+        radio.addEventListener('change', updateModeFields);
     });
 
     // Event: Translate
@@ -328,16 +379,20 @@ function showSettingsView() {
     document.getElementById('ust-settings-view').style.display = 'block';
 
     // Fill current settings
+    document.getElementById('ust-mode-openai').checked = currentSettings.translationMode === 'openai';
     document.getElementById('ust-mode-api').checked = currentSettings.translationMode === 'api';
-    document.getElementById('ust-mode-bridge').checked = currentSettings.translationMode !== 'api';
+    document.getElementById('ust-mode-bridge').checked = currentSettings.translationMode === 'bridge';
     document.getElementById('ust-api-key').value = currentSettings.apiKey || '';
     document.getElementById('ust-api-model').value = currentSettings.apiModel || 'deepseek-chat';
+    document.getElementById('ust-openai-url').value = currentSettings.openaiUrl || 'http://dunremote.fastddns.org:10100';
+    document.getElementById('ust-openai-key').value = currentSettings.openaiKey || '';
     document.getElementById('ust-bridge-url').value = currentSettings.bridgeUrl || DEFAULT_BRIDGE_URL;
 
     // Toggle fields visibility
-    const isApi = currentSettings.translationMode === 'api';
-    document.getElementById('ust-api-fields').style.display = isApi ? 'block' : 'none';
-    document.getElementById('ust-bridge-fields').style.display = isApi ? 'none' : 'block';
+    const mode = currentSettings.translationMode;
+    document.getElementById('ust-openai-fields').style.display = mode === 'openai' ? 'block' : 'none';
+    document.getElementById('ust-api-fields').style.display = mode === 'api' ? 'block' : 'none';
+    document.getElementById('ust-bridge-fields').style.display = mode === 'bridge' ? 'block' : 'none';
 
     // Clear info
     const info = document.getElementById('ust-settings-info');
@@ -351,8 +406,11 @@ function updateModeIndicator() {
     const indicator = document.getElementById('ust-mode-indicator');
     if (!indicator) return;
 
-    if (currentSettings.translationMode === 'api') {
-        indicator.textContent = `🚀 API Mode — ${currentSettings.apiModel}`;
+    if (currentSettings.translationMode === 'openai') {
+        indicator.textContent = '🤖 OpenAI — deepseek-v3.2';
+        indicator.className = 'ust-mode-indicator ust-mode-api';
+    } else if (currentSettings.translationMode === 'api') {
+        indicator.textContent = `🚀 1min.ai — ${currentSettings.apiModel}`;
         indicator.className = 'ust-mode-indicator ust-mode-api';
     } else {
         indicator.textContent = '🌉 Bridge Mode';
@@ -364,10 +422,31 @@ function updateModeIndicator() {
  * Check connection status based on mode
  */
 async function checkConnectionStatus() {
-    if (currentSettings.translationMode === 'api') {
+    if (currentSettings.translationMode === 'openai') {
+        await checkOpenAiStatus();
+    } else if (currentSettings.translationMode === 'api') {
         await checkApiStatus();
     } else {
         await checkBridgeStatus();
+    }
+}
+
+/**
+ * Check OpenAI mode status
+ */
+async function checkOpenAiStatus() {
+    const dot = document.getElementById('ust-bridge-dot');
+    const label = document.getElementById('ust-bridge-label');
+    if (!dot || !label) return false;
+
+    if (currentSettings.openaiUrl) {
+        dot.className = 'ust-dot ust-dot-ok';
+        label.textContent = `OpenAI ✅ (${currentSettings.openaiUrl.substring(0, 30)})`;
+        return true;
+    } else {
+        dot.className = 'ust-dot ust-dot-err';
+        label.textContent = 'OpenAI URL ❌ (Mở Settings)';
+        return false;
     }
 }
 
@@ -481,12 +560,13 @@ function hideProgress() {
 
 // ==================== SUBTITLE OVERLAY ====================
 
-// Drag state
-let overlayDragged = false;  // true nếu user đã drag → không auto-position
-let dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOffsetY = 0;
+// Position relative to video (0-1 ratios)
+let overlayRelX = 0.5;   // Center horizontal
+let overlayRelY = 0.85;  // Near bottom
+let overlayDragged = false;
 
 /**
- * Tạo overlay element với drag support
+ * Tạo overlay element với drag support (center-based)
  */
 function createOverlay() {
     if (overlayElement) return overlayElement;
@@ -497,55 +577,70 @@ function createOverlay() {
     overlayElement.style.display = 'none';
     document.body.appendChild(overlayElement);
 
-    // Load saved position
+    // Load saved relative position
     try {
         const savedPos = localStorage.getItem('ust_overlay_pos');
         if (savedPos) {
             const pos = JSON.parse(savedPos);
-            overlayElement.style.left = pos.left;
-            overlayElement.style.top = pos.top;
-            overlayElement.style.bottom = 'auto';
-            overlayElement.style.transform = 'none';
+            if (pos.relX != null) overlayRelX = pos.relX;
+            if (pos.relY != null) overlayRelY = pos.relY;
             if (pos.width) overlayElement.style.width = pos.width;
             if (pos.height) overlayElement.style.height = pos.height;
             overlayDragged = true;
         }
-    } catch (e) {}
+    } catch (e) { }
 
-    // Drag handlers
+    // Drag handlers — drag từ CENTER
     overlayElement.addEventListener('mousedown', (e) => {
         if (e.target !== overlayElement) return;
         e.preventDefault();
         overlayElement.classList.add('ust-dragging');
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
+
+        // Offset từ center của overlay
         const rect = overlayElement.getBoundingClientRect();
-        dragOffsetX = e.clientX - rect.left;
-        dragOffsetY = e.clientY - rect.top;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const offsetX = e.clientX - centerX;
+        const offsetY = e.clientY - centerY;
 
         function onMouseMove(e) {
-            const newLeft = e.clientX - dragOffsetX;
-            const newTop = e.clientY - dragOffsetY;
-            overlayElement.style.left = newLeft + 'px';
-            overlayElement.style.top = newTop + 'px';
+            // Tính center mới
+            const newCenterX = e.clientX - offsetX;
+            const newCenterY = e.clientY - offsetY;
+
+            // Đặt left = center, dùng translateX(-50%) để căn giữa
+            overlayElement.style.left = newCenterX + 'px';
+            overlayElement.style.top = (newCenterY - overlayElement.offsetHeight / 2) + 'px';
             overlayElement.style.bottom = 'auto';
-            overlayElement.style.transform = 'none';
+            overlayElement.style.transform = 'translateX(-50%)';
         }
 
-        function onMouseUp() {
+        function onMouseUp(e) {
             overlayElement.classList.remove('ust-dragging');
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
+
+            // Tính ratio relative to video
+            if (videoElement) {
+                const vRect = videoElement.getBoundingClientRect();
+                const oRect = overlayElement.getBoundingClientRect();
+                const oCenterX = oRect.left + oRect.width / 2;
+                const oCenterY = oRect.top + oRect.height / 2;
+                overlayRelX = (oCenterX - vRect.left) / vRect.width;
+                overlayRelY = (oCenterY - vRect.top) / vRect.height;
+            }
+
             overlayDragged = true;
-            // Save position
+
+            // Save ratio
             try {
                 localStorage.setItem('ust_overlay_pos', JSON.stringify({
-                    left: overlayElement.style.left,
-                    top: overlayElement.style.top,
+                    relX: overlayRelX,
+                    relY: overlayRelY,
                     width: overlayElement.style.width || null,
                     height: overlayElement.style.height || null,
                 }));
-            } catch (e) {}
+            } catch (e) { }
         }
 
         document.addEventListener('mousemove', onMouseMove);
@@ -595,10 +690,7 @@ function syncSubtitles() {
     if (active) {
         overlayElement.textContent = active.text;
         overlayElement.style.display = 'block';
-        // Auto-position nếu chưa drag
-        if (!overlayDragged) {
-            positionOverlay();
-        }
+        positionOverlay();  // Luôn reposition theo video
     } else {
         overlayElement.style.display = 'none';
     }
@@ -622,28 +714,33 @@ function attachToVideo() {
     // Listen cho timeupdate
     videoElement.addEventListener('timeupdate', syncSubtitles);
 
-    // Reposition khi fullscreen/resize (chỉ khi chưa drag)
+    // Reposition khi fullscreen/resize — LUÔN LUÔN (overlay follow video)
     document.addEventListener('fullscreenchange', () => {
-        if (!overlayDragged) setTimeout(positionOverlay, 500);
+        setTimeout(positionOverlay, 300);
     });
     window.addEventListener('resize', () => {
-        if (!overlayDragged) requestAnimationFrame(positionOverlay);
+        requestAnimationFrame(positionOverlay);
     });
 
     console.log('[UST] Attached to video player');
 }
 
 /**
- * Position overlay centered above video bottom (fixed positioning)
+ * Position overlay relative to video using stored ratios
+ * Luôn follow video dù đã drag hay chưa
  */
 function positionOverlay() {
     if (!overlayElement || !videoElement) return;
-    if (overlayDragged) return;  // User đã drag → giữ nguyên vị trí
 
-    const rect = videoElement.getBoundingClientRect();
-    // Đặt ở bottom video, center horizontal
-    overlayElement.style.left = (rect.left + rect.width / 2) + 'px';
-    overlayElement.style.top = (rect.bottom - 80) + 'px';
+    const vRect = videoElement.getBoundingClientRect();
+    if (vRect.width === 0 || vRect.height === 0) return;
+
+    // Tính center position dựa trên video rect + ratio
+    const centerX = vRect.left + overlayRelX * vRect.width;
+    const centerY = vRect.top + overlayRelY * vRect.height;
+
+    overlayElement.style.left = centerX + 'px';
+    overlayElement.style.top = (centerY - overlayElement.offsetHeight / 2) + 'px';
     overlayElement.style.bottom = 'auto';
     overlayElement.style.transform = 'translateX(-50%)';
 }
@@ -894,7 +991,16 @@ async function handleStartTranslation() {
     }
 
     // Validation based on mode
-    if (currentSettings.translationMode === 'api') {
+    if (currentSettings.translationMode === 'openai') {
+        if (!currentSettings.openaiUrl) {
+            const info = document.getElementById('ust-info');
+            if (info) {
+                info.textContent = 'Chưa có Server URL! Mở Settings để cấu hình.';
+                info.className = 'ust-info ust-info-err';
+            }
+            return;
+        }
+    } else if (currentSettings.translationMode === 'api') {
         if (!currentSettings.apiKey) {
             const info = document.getElementById('ust-info');
             if (info) {
@@ -940,8 +1046,19 @@ async function handleStartTranslation() {
         const vttContent = response.content;
         console.log(`[UST] VTT fetched: ${vttContent.length} chars`);
 
+        if (currentSettings.translationMode === 'openai') {
+            // === OPENAI MODE: qua port ===
+            console.log('[UST] Using OpenAI mode via port');
+            startTranslationPort({
+                type: 'TRANSLATE_OPENAI',
+                vttContent,
+                settings: currentSettings,
+            });
+            return;
+        }
+
         if (currentSettings.translationMode === 'api') {
-            // === API MODE: qua port (giữ service worker sống) ===
+            // === API MODE: qua port ===
             console.log('[UST] Using API mode via port');
             startTranslationPort({
                 type: 'TRANSLATE_API',
@@ -951,7 +1068,7 @@ async function handleStartTranslation() {
             return;
         }
 
-        // === BRIDGE MODE: qua port (giữ service worker sống) ===
+        // === BRIDGE MODE: qua port ===
         console.log('[UST] Using Bridge mode via port');
         const bridgeUrl = currentSettings.bridgeUrl || DEFAULT_BRIDGE_URL;
         startTranslationPort({
@@ -991,5 +1108,120 @@ const observer = new MutationObserver(() => {
     if (!videoElement) attachToVideo();
 });
 observer.observe(document.body, { childList: true, subtree: true });
+
+// ==================== AUTO-LOAD SUBTITLES ON SPA NAVIGATION ====================
+
+let lastUrl = window.location.href;
+
+/**
+ * Phát hiện Udemy SPA navigation → auto-load phụ đề Tiếng Anh
+ */
+function watchUrlChanges() {
+    // Monkey-patch History API
+    const origPushState = history.pushState;
+    const origReplaceState = history.replaceState;
+
+    history.pushState = function (...args) {
+        origPushState.apply(this, args);
+        onUrlChange();
+    };
+    history.replaceState = function (...args) {
+        origReplaceState.apply(this, args);
+        onUrlChange();
+    };
+
+    // Back/forward
+    window.addEventListener('popstate', () => onUrlChange());
+}
+
+function onUrlChange() {
+    const newUrl = window.location.href;
+    if (newUrl === lastUrl) return;
+
+    // Chỉ trigger khi chuyển video (URL chứa /lecture/)
+    const isLecture = newUrl.includes('/lecture/') || newUrl.includes('/learn/');
+    if (!isLecture) {
+        lastUrl = newUrl;
+        return;
+    }
+
+    console.log(`[UST] URL changed → ${newUrl.substring(0, 80)}`);
+    lastUrl = newUrl;
+
+    // Reset video element (SPA thường tạo video mới)
+    if (videoElement) {
+        videoElement.removeEventListener('timeupdate', syncSubtitles);
+        videoElement = null;
+    }
+
+    // Delay để Udemy load video player
+    setTimeout(() => {
+        attachToVideo();
+        autoLoadSubtitle();
+    }, 2500);
+}
+
+/**
+ * Tự động click "Tiếng Anh" trong CC menu → trigger VTT download → click "Tắt"
+ */
+async function autoLoadSubtitle() {
+    console.log('[UST] Auto-loading subtitle...');
+
+    // Bước 1: Tìm nút CC trên video player để mở menu
+    const ccButton = document.querySelector('[data-purpose="captions-dropdown-button"]')
+        || document.querySelector('button[aria-label*="aption"]')
+        || document.querySelector('button[aria-label*="ubtitle"]');
+
+    if (ccButton) {
+        ccButton.click();
+        console.log('[UST] Clicked CC button');
+        await sleep(800);
+    }
+
+    // Bước 2: Tìm button "Tiếng Anh" trong danh sách
+    let englishBtn = null;
+    const buttons = document.querySelectorAll('.ud-popper-open .ud-unstyled-list li button');
+
+    for (const btn of buttons) {
+        const text = (btn.textContent || btn.innerText || '').toLowerCase().trim();
+        if (text.includes('tiếng anh') || text.includes('english')) {
+            englishBtn = btn;
+            break;
+        }
+    }
+
+    if (englishBtn) {
+        englishBtn.click();
+        console.log('[UST] ✅ Clicked "Tiếng Anh" subtitle');
+
+        // Bước 3: Đợi VTT load, rồi tắt subtitle gốc
+        await sleep(1500);
+
+        // Tìm nút "Tắt" 
+        if (ccButton) ccButton.click(); // Mở lại menu
+        await sleep(500);
+
+        const allButtons = document.querySelectorAll('.ud-popper-open .ud-unstyled-list li button');
+        for (const btn of allButtons) {
+            const text = (btn.textContent || btn.innerText || '').toLowerCase().trim();
+            if (text === 'tắt' || text === 'off') {
+                btn.click();
+                console.log('[UST] ✅ Clicked "Tắt" — ẩn subtitle gốc');
+                break;
+            }
+        }
+    } else {
+        console.log('[UST] ⚠️ Không tìm thấy button "Tiếng Anh"');
+        // Đóng menu nếu đã mở
+        if (ccButton) ccButton.click();
+    }
+}
+
+function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+}
+
+// Start watching
+watchUrlChanges();
 
 console.log('[UST] Content script loaded on:', window.location.href);
