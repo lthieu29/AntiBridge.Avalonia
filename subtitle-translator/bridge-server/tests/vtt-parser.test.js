@@ -177,11 +177,53 @@ describe('reconstructVtt', () => {
 });
 
 describe('timestampToSeconds', () => {
-    it('should convert timestamps correctly', () => {
+    it('should convert HH:MM:SS.mmm timestamps correctly', () => {
         assert.equal(timestampToSeconds('00:00:01.000'), 1);
         assert.equal(timestampToSeconds('00:01:00.000'), 60);
         assert.equal(timestampToSeconds('01:00:00.000'), 3600);
         assert.equal(timestampToSeconds('00:00:01.500'), 1.5);
         assert.equal(timestampToSeconds('01:23:45.678'), 5025.678);
     });
+
+    it('should convert MM:SS.mmm timestamps correctly (Udemy short format)', () => {
+        assert.equal(timestampToSeconds('00:01.000'), 1);
+        assert.equal(timestampToSeconds('01:00.000'), 60);
+        assert.equal(timestampToSeconds('00:03.240'), 3.24);
+        assert.equal(timestampToSeconds('02:00.710'), 120.71);
+    });
 });
+
+const SHORT_TIMESTAMP_VTT = `WEBVTT
+
+00:00.280 --> 00:03.240
+Hello and welcome to this course
+
+00:03.600 --> 00:07.040
+In today's lesson, we'll explore what this is
+
+00:07.360 --> 00:12.880
+Walk through a brief history of its development
+`;
+
+describe('parseVtt with short timestamps (MM:SS.mmm)', () => {
+    it('should parse VTT with MM:SS.mmm format', () => {
+        const { cues, header } = parseVtt(SHORT_TIMESTAMP_VTT);
+        assert.equal(header, 'WEBVTT');
+        assert.equal(cues.length, 3);
+    });
+
+    it('should extract correct short timestamps', () => {
+        const { cues } = parseVtt(SHORT_TIMESTAMP_VTT);
+        assert.equal(cues[0].startTime, '00:00.280');
+        assert.equal(cues[0].endTime, '00:03.240');
+        assert.equal(cues[2].startTime, '00:07.360');
+        assert.equal(cues[2].endTime, '00:12.880');
+    });
+
+    it('should extract correct text from short-timestamp VTT', () => {
+        const { cues } = parseVtt(SHORT_TIMESTAMP_VTT);
+        assert.equal(cues[0].text, 'Hello and welcome to this course');
+        assert.equal(cues[1].text, "In today's lesson, we'll explore what this is");
+    });
+});
+

@@ -50,8 +50,8 @@ function parseVtt(vttString) {
             i++;
         }
 
-        // Kiểm tra timestamp line
-        const timestampMatch = lines[i]?.trim().match(/^(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})/);
+        // Kiểm tra timestamp line - hỗ trợ cả MM:SS.mmm và HH:MM:SS.mmm
+        const timestampMatch = lines[i]?.trim().match(/^((?:\d{2}:)?\d{2}:\d{2}\.\d{3})\s*-->\s*((?:\d{2}:)?\d{2}:\d{2}\.\d{3})/);
         if (!timestampMatch) {
             i++;
             continue;
@@ -121,9 +121,18 @@ function reconstructVtt(header, originalCues, translations) {
  */
 function timestampToSeconds(timestamp) {
     const parts = timestamp.split(':');
-    const hours = parseInt(parts[0]);
-    const minutes = parseInt(parts[1]);
-    const secondsParts = parts[2].split('.');
+    let hours, minutes, secAndMs;
+    if (parts.length === 3) {
+        hours = parseInt(parts[0]);
+        minutes = parseInt(parts[1]);
+        secAndMs = parts[2];
+    } else {
+        // Format MM:SS.mmm (không có giờ)
+        hours = 0;
+        minutes = parseInt(parts[0]);
+        secAndMs = parts[1];
+    }
+    const secondsParts = secAndMs.split('.');
     const seconds = parseInt(secondsParts[0]);
     const ms = parseInt(secondsParts[1]);
     return hours * 3600 + minutes * 60 + seconds + ms / 1000;

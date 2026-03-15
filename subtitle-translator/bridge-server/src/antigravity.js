@@ -18,7 +18,7 @@ class AntigravityBridge {
     constructor() {
         this.browser = null;
         this.page = null;       // workbench page (chính)
-        this.chatPage = null;   // cascade-panel webview page
+        // Chat panel (.antigravity-agent-side-panel) nằm trong workbench page DOM
         this.isConnected = false;
         this.lastResponseText = '';
 
@@ -200,7 +200,7 @@ class AntigravityBridge {
                 logger.info(`[CDP]   Target ${i}: type="${t.type}" title="${(t.title || '').substring(0, 60)}" url="${(t.url || '').substring(0, 120)}"`);
             }
 
-            // === BƯỚC 2: Connect browser-level, bao gồm TẤT CẢ target types ===
+            // === BƯỚC 2: Connect browser-level ===
             const versionRes = await fetch(`${config.cdpUrl}/json/version`);
             const versionData = await versionRes.json();
             const wsEndpoint = versionData.webSocketDebuggerUrl;
@@ -209,18 +209,11 @@ class AntigravityBridge {
             this.browser = await puppeteer.connect({
                 browserWSEndpoint: wsEndpoint,
                 defaultViewport: null,
-                // Bao gồm TẤT CẢ target types (page, webview, worker, other, ...)
                 targetFilter: (target) => true
             });
 
-            // === BƯỚC 3: Tìm tất cả pages (bao gồm webview targets) ===
-            const allTargets = this.browser.targets();
-            logger.info(`[CDP] Browser targets sau connect: ${allTargets.length}`);
-            for (let i = 0; i < allTargets.length; i++) {
-                const t = allTargets[i];
-                logger.info(`[CDP]   BrowserTarget ${i}: type="${t.type()}" url="${(t.url() || '').substring(0, 120)}"`);
-            }
-
+            // === BƯỚC 3: Tìm workbench page (chứa chat panel) ===
+            // Chat panel (.antigravity-agent-side-panel) nằm trực tiếp trong DOM của workbench.html
             const pages = await this.browser.pages();
             logger.info(`[CDP] Pages: ${pages.length}`);
 
@@ -229,57 +222,66 @@ class AntigravityBridge {
                 const title = await pages[i].title().catch(() => '');
                 logger.info(`[CDP]   Page ${i}: title="${title}" url="${url.substring(0, 120)}"`);
 
-                if (url.includes('cascade-panel')) {
-                    this.chatPage = pages[i];
-                    logger.info(`[CDP] ✅ Tìm thấy chatPage (cascade-panel) tại index ${i}`);
-                }
-                if (url.includes('workbench')) {
+                // Tìm workbench.html (main editor page — chứa chat side panel)
+                if (url.includes('workbench.html') && !url.includes('jetski-agent')) {
                     this.page = pages[i];
+                    logger.info(`[CDP] ✅ Tìm thấy workbench page tại index ${i}`);
                 }
             }
 
-            // === BƯỚC 4: Nếu chưa có chatPage, thử attach vào webview target ===
-            if (!this.chatPage) {
-                logger.warn('[CDP] chatPage chưa tìm thấy qua pages(), thử attach webview target...');
-                for (const target of allTargets) {
-                    const url = target.url() || '';
-                    if (url.includes('cascade-panel')) {
-                        try {
-                            const targetPage = await target.page();
-                            if (targetPage) {
-                                this.chatPage = targetPage;
-                                logger.info(`[CDP] ✅ Attach chatPage từ target: ${url.substring(0, 100)}`);
-                                break;
-                            }
-                        } catch (e) {
-                            logger.debug(`[CDP] Không thể attach target: ${e.message}`);
-                        }
+            // Fallback: lấy page đầu tiên có 'workbench' trong URL
+            if (!this.page) {
+                for (let i = 0; i < pages.length; i++) {
+                    if (pages[i].url().includes('workbench')) {
+                        this.page = pages[i];
+                        logger.info(`[CDP] ✅ Fallback: dùng workbench page tại index ${i}`);
+                        break;
                     }
                 }
             }
 
-            if (!this.chatPage) {
-                logger.warn('[CDP] ⚠️ Không tìm thấy cascade-panel! Chat panel có đang mở không?');
-            }
-
-            // Fallback page
             if (!this.page && pages.length > 0) {
                 this.page = pages[0];
+                logger.warn(`[CDP] ⚠️ Fallback: dùng page đầu tiên`);
+            }
+
+            // === BƯỚC 4: Verify chat panel tồn tại trong workbench page ===
+            if (this.page) {
+                try {
+                    const panelCheck = await this.page.evaluate(() => {
+                        const panel = document.querySelector('.antigravity-agent-side-panel');
+                        if (!panel) return { found: false };
+                        const style = window.getComputedStyle(panel);
+                        return {
+                            found: true,
+                            display: style.display,
+                            width: panel.offsetWidth,
+                            height: panel.offsetHeight,
+                        };
+                    });
+
+                    if (panelCheck.found) {
+                        logger.info(`[CDP] ✅ Chat panel tìm thấy! display=${panelCheck.display}, size=${panelCheck.width}x${panelCheck.height}`);
+                    } else {
+                        logger.warn('[CDP] ⚠️ Chat panel (.antigravity-agent-side-panel) chưa hiển thị. Hãy mở chat panel trong Antigravity IDE!');
+                    }
+                } catch (e) {
+                    logger.debug(`[CDP] Panel check error: ${e.message}`);
+                }
             }
 
             this.browser.on('disconnected', () => {
                 logger.warn('[CDP] ❌ Mất kết nối browser!');
                 this.isConnected = false;
-                this.chatPage = null;
                 if (this.autoReconnect) {
                     this.tryReconnect();
                 }
             });
 
-            if (this.chatPage || this.page) {
+            if (this.page) {
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
-                logger.info(`[CDP] ✅ Kết nối thành công! chatPage=${!!this.chatPage}, workbenchPage=${!!this.page}`);
+                logger.info(`[CDP] ✅ Kết nối thành công!`);
                 return true;
             } else {
                 logger.error('[CDP] ❌ Không tìm thấy page nào phù hợp');
@@ -309,7 +311,6 @@ class AntigravityBridge {
 
         this.browser = null;
         this.page = null;
-        this.chatPage = null;
 
         return await this.connect();
     }
@@ -324,67 +325,36 @@ class AntigravityBridge {
     }
 
     /**
-     * Tìm chat panel page/frame
-     * Ưu tiên dùng chatPage (CDP target trực tiếp), fallback tìm frame trong workbench
+     * Tìm chat panel frame
+     * Chat panel (.antigravity-agent-side-panel) nằm trực tiếp trong workbench page DOM
      */
     async findChatFrame() {
-        // === Ưu tiên 1: chatPage (direct CDP target) ===
-        if (this.chatPage) {
-            // chatPage là 1 Page object, mainFrame() trả về Frame interface tương thích
-            logger.debug('[FRAME] Dùng chatPage (CDP target trực tiếp)');
-            return this.chatPage.mainFrame();
-        }
-
-        // === Fallback: Tìm trong frames của workbench page ===
         if (!this.page) {
-            logger.error('[FRAME] Không có page nào!');
+            logger.error('[FRAME] Không có workbench page!');
             return null;
         }
 
-        const frames = this.page.frames();
-        logger.info(`[FRAME] Fallback: tìm trong ${frames.length} frames của workbench`);
+        // Chat panel nằm trực tiếp trong workbench page, không cần tìm frame riêng
+        const frame = this.page.mainFrame();
 
-        for (let i = 0; i < frames.length; i++) {
-            const frameUrl = frames[i].url();
-            logger.debug(`[FRAME] Frame ${i}: url="${(frameUrl || '').substring(0, 100)}"`);
-
-            if (frameUrl && frameUrl.includes('cascade-panel')) {
-                logger.info(`[FRAME] ✅ Tìm thấy cascade-panel frame tại index ${i}`);
-                return frames[i];
-            }
-        }
-
-        // === Fallback 2: Thử re-discover cascade-panel target qua browser.targets() ===
-        logger.warn('[FRAME] ❌ Không tìm thấy cascade-panel. Thử re-discover...');
+        // Verify chat panel tồn tại
         try {
-            if (this.browser) {
-                const allTargets = this.browser.targets();
-                for (const target of allTargets) {
-                    const url = target.url() || '';
-                    if (url.includes('cascade-panel')) {
-                        const targetPage = await target.page();
-                        if (targetPage) {
-                            this.chatPage = targetPage;
-                            logger.info(`[FRAME] ✅ Re-discovered chatPage: ${url.substring(0, 100)}`);
-                            return this.chatPage.mainFrame();
-                        }
-                    }
-                }
-            }
+            const panelExists = await frame.evaluate(() => {
+                const panel = document.querySelector('.antigravity-agent-side-panel');
+                return panel && panel.offsetWidth > 0;
+            });
 
-            // Log tất cả targets từ /json để debug
-            const targetsRes = await fetch(`${config.cdpUrl}/json`);
-            const targets = await targetsRes.json();
-            logger.warn('[FRAME] cascade-panel target không tìm thấy');
-            logger.warn('[FRAME] 📋 Targets hiện có:');
-            for (const t of targets) {
-                logger.warn(`[FRAME]   type=${t.type} url=${(t.url || '').substring(0, 120)}`);
+            if (panelExists) {
+                logger.debug('[FRAME] ✅ Chat panel (.antigravity-agent-side-panel) sẵn sàng');
+                return frame;
+            } else {
+                logger.warn('[FRAME] ⚠️ Chat panel chưa hiển thị. Hãy mở chat panel!');
+                return null;
             }
         } catch (e) {
-            logger.error(`[FRAME] Re-discover error: ${e.message}`);
+            logger.error(`[FRAME] Error checking panel: ${e.message}`);
+            return null;
         }
-
-        return null;
     }
 
     /**
@@ -407,32 +377,41 @@ class AntigravityBridge {
             if (!chatFrame) return false;
 
             try {
-                // Thử từng selector
-                const selectors = ['textarea', '[contenteditable="true"]', '[role="textbox"]'];
+                // Tìm input trong .antigravity-agent-side-panel
+                // Input là Lexical editor: div[contenteditable="true"][data-lexical-editor="true"]
+                const selectors = [
+                    '.antigravity-agent-side-panel [data-lexical-editor="true"]',
+                    '.antigravity-agent-side-panel [contenteditable="true"]',
+                    '.antigravity-agent-side-panel [role="textbox"]',
+                    '[data-lexical-editor="true"]',
+                    '[contenteditable="true"][role="textbox"]',
+                ];
                 let input = null;
 
                 for (const sel of selectors) {
                     const found = await chatFrame.$(sel);
-                    logger.info(`[INPUT] Selector thử: "${sel}" → ${found ? '✅ có' : '❌ không'}`);
+                    logger.info(`[INPUT] Selector: "${sel}" → ${found ? '✅ có' : '❌ không'}`);
                     if (found && !input) {
                         input = found;
                     }
                 }
 
                 if (!input) {
-                    logger.error('[INPUT] ❌ Không tìm thấy input element nào trong cascade-panel');
-                    // Dump top elements for debugging
+                    logger.error('[INPUT] ❌ Không tìm thấy input element nào trong chat panel');
+                    // Dump panel info for debugging
                     try {
                         const dump = await chatFrame.evaluate(() => {
+                            const panel = document.querySelector('.antigravity-agent-side-panel');
+                            if (!panel) return { panelFound: false };
                             const els = [];
-                            document.querySelectorAll('*').forEach(el => {
+                            panel.querySelectorAll('*').forEach(el => {
                                 if (el.tagName && el.className) {
                                     els.push(`${el.tagName}.${(el.className.toString() || '').substring(0, 60)}`);
                                 }
                             });
-                            return els.slice(0, 20);
+                            return { panelFound: true, topElements: els.slice(0, 20) };
                         });
-                        logger.error(`[INPUT] 📋 Top 20 elements: ${dump.join(', ')}`);
+                        logger.error(`[INPUT] 📋 Panel debug: ${JSON.stringify(dump)}`);
                     } catch (e) { }
                     return false;
                 }
@@ -440,16 +419,18 @@ class AntigravityBridge {
                 const inputInfo = await chatFrame.evaluate(el => ({
                     tag: el.tagName,
                     id: el.id,
+                    contentEditable: el.contentEditable,
+                    isLexical: !!el.dataset?.lexicalEditor,
                     className: (el.className?.toString?.() || '').substring(0, 80)
                 }), input);
-                logger.info(`[INPUT] ✅ Input: tag=${inputInfo.tag}, id=${inputInfo.id || 'none'}, class="${inputInfo.className}"`);
+                logger.info(`[INPUT] ✅ Input: tag=${inputInfo.tag}, lexical=${inputInfo.isLexical}, class="${inputInfo.className}"`);
 
                 // Focus + click
                 await input.focus();
                 await input.click();
                 logger.debug('[INPUT] Focus + click → OK');
 
-                // Type in chunks
+                // Type in chunks (Lexical editor xử lý keyboard events)
                 if (sanitizedText.length <= 100) {
                     await input.type(sanitizedText, { delay: 0 });
                 } else {
@@ -461,12 +442,15 @@ class AntigravityBridge {
                 }
 
                 logger.debug('[INPUT] ✅ Type xong, đang press Enter...');
+
+                // Snapshot response TRƯỚC khi gửi — để waitForResponse biết cái nào là cũ
+                this.lastResponseText = await this.getLatestResponse() || this.lastResponseText;
+                logger.debug(`[INPUT] Snapshot lastResponseText: ${(this.lastResponseText || '').length} chars`);
+
                 await new Promise(r => setTimeout(r, 200));
-                await chatFrame.page().keyboard.press('Enter');
+                await this.page.keyboard.press('Enter');
 
                 logger.info('[INPUT] ✅ Message đã gửi thành công');
-
-                this.lastResponseText = await this.getLatestResponse();
                 return true;
 
             } catch (frameErr) {
@@ -502,22 +486,15 @@ class AntigravityBridge {
                     const debugLog = [];
                     const candidates = [];
 
-                    // === IFRAME-FIRST: Kiểm tra nested iframe ===
-                    let targetDoc = document;
-                    const iframe = document.querySelector('iframe');
-                    if (iframe) {
-                        try {
-                            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-                            if (iframeDoc) {
-                                targetDoc = iframeDoc;
-                                debugLog.push('[RESPONSE] ✅ Tìm thấy nested iframe, dùng iframe document');
-                            }
-                        } catch (e) {
-                            debugLog.push(`[RESPONSE] ⚠️ Iframe cross-origin: ${e.message}, dùng document gốc`);
-                        }
-                    } else {
-                        debugLog.push('[RESPONSE] ⚠️ Không có nested iframe, dùng document gốc');
+                    // Tìm chat panel và conversation container
+                    const panel = document.querySelector('.antigravity-agent-side-panel');
+                    if (!panel) {
+                        debugLog.push('[RESPONSE] ❌ Không tìm thấy .antigravity-agent-side-panel');
+                        return { text: null, debugLog, candidateCount: 0 };
                     }
+
+                    const conversation = panel.querySelector('#conversation') || panel;
+                    debugLog.push(`[RESPONSE] Panel found, conversation=${conversation.id || 'panel-fallback'}`);
 
                     // Helper: HTML to text
                     function htmlToText(el) {
@@ -527,6 +504,8 @@ class AntigravityBridge {
                                 text += node.textContent;
                             } else if (node.nodeType === Node.ELEMENT_NODE) {
                                 const tag = node.tagName.toLowerCase();
+                                // Bỏ qua <style> và <svg>
+                                if (tag === 'style' || tag === 'svg' || tag === 'script') return;
                                 if (tag === 'li') {
                                     const parent = node.parentElement?.tagName?.toLowerCase();
                                     if (parent === 'ol') {
@@ -552,41 +531,51 @@ class AntigravityBridge {
                         return text.trim().replace(/\n{3,}/g, '\n\n');
                     }
 
-                    // Tìm prose elements trong targetDoc
-                    const proseElements = targetDoc.querySelectorAll('[class*="prose"]');
-                    debugLog.push(`[RESPONSE] targetDoc.querySelectorAll('[class*="prose"]'): ${proseElements.length} elements`);
+                    // Tìm response elements trong conversation
+                    // Antigravity dùng class "leading-relaxed select-text" cho rendered markdown response
+                    const responseElements = conversation.querySelectorAll('.leading-relaxed.select-text');
+                    debugLog.push(`[RESPONSE] Tìm thấy ${responseElements.length} .leading-relaxed.select-text elements`);
 
-                    proseElements.forEach((el, i) => {
+                    responseElements.forEach((el, i) => {
                         const className = el.className?.toString?.() || '';
-                        const parentClass = el.parentElement?.className?.toString?.() || '';
 
+                        // Bỏ qua thinking blocks (opacity-70)
                         const hasOpacity70 = className.includes('opacity-70');
-                        const hasMaxH200 = parentClass.includes('max-h-[200px]') || parentClass.includes('overflow-y-auto');
+                        // Bỏ qua collapsed thinking (max-h-[200px])
+                        const isInCollapsed = el.closest('.max-h-\\[200px\\]') ||
+                            el.closest('[class*="max-h-"]');
+                        // Bỏ qua input/menu elements
                         const hasInput = className.includes('input') || className.includes('menu');
-
-                        debugLog.push(`[RESPONSE] Element ${i}: class="${className.substring(0, 80)}" parentClass="${parentClass.substring(0, 80)}" opacity70=${hasOpacity70} maxH200=${hasMaxH200}`);
+                        // Bỏ qua user messages (nằm trong bg-gray-500/15)
+                        const isUserMessage = el.closest('.bg-gray-500\\/15') || 
+                            el.closest('[class*="bg-gray-500/15"]');
 
                         if (hasOpacity70) {
-                            debugLog.push(`[RESPONSE]   → BỎ QUA (thinking: opacity-70)`);
+                            debugLog.push(`[RESPONSE]   Element ${i}: BỎ QUA (thinking: opacity-70)`);
                             return;
                         }
-                        if (hasMaxH200) {
-                            debugLog.push(`[RESPONSE]   → BỎ QUA (collapsed thinking: maxH200)`);
+                        if (isInCollapsed) {
+                            debugLog.push(`[RESPONSE]   Element ${i}: BỎ QUA (collapsed thinking)`);
                             return;
                         }
                         if (hasInput) {
-                            debugLog.push(`[RESPONSE]   → BỎ QUA (input/menu element)`);
+                            debugLog.push(`[RESPONSE]   Element ${i}: BỎ QUA (input/menu)`);
+                            return;
+                        }
+                        if (isUserMessage) {
+                            debugLog.push(`[RESPONSE]   Element ${i}: BỎ QUA (user message)`);
                             return;
                         }
 
                         const text = htmlToText(el);
-                        debugLog.push(`[RESPONSE]   textLength=${text.length}, preview="${text.substring(0, 100).replace(/\n/g, '\\n')}"`);
+                        debugLog.push(`[RESPONSE]   Element ${i}: textLength=${text.length}, preview="${text.substring(0, 100).replace(/\n/g, '\\n')}"`);
 
                         if (text.length < 50) {
                             debugLog.push(`[RESPONSE]   → BỎ QUA (quá ngắn)`);
                             return;
                         }
 
+                        // Bỏ qua thinking patterns
                         if (/^(I'm currently|I've|My plan|Initiating|Verifying|Considering|Examining|Analyzing|Acknowledging|Assessing)/i.test(text)) {
                             debugLog.push(`[RESPONSE]   → BỎ QUA (thinking pattern)`);
                             return;
@@ -595,26 +584,21 @@ class AntigravityBridge {
                         candidates.push({
                             text,
                             len: text.length,
+                            domIndex: i, // Vị trí trong DOM — index cao hơn = mới hơn
                             className: className.substring(0, 100),
-                            hasVietnamese: /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(text),
-                            hasNumberedList: /^\d+\.\s+/m.test(text)
                         });
                     });
 
-                    // Sort: numbered list > Vietnamese > longest
-                    candidates.sort((a, b) => {
-                        if (a.hasNumberedList !== b.hasNumberedList) return a.hasNumberedList ? -1 : 1;
-                        if (a.hasVietnamese !== b.hasVietnamese) return a.hasVietnamese ? -1 : 1;
-                        return b.len - a.len;
-                    });
-
+                    // KHÔNG sort — lấy candidate CUỐI CÙNG (mới nhất trong DOM)
+                    // Đây là fix cho bug chunk 2: sort cũ ưu tiên chunk 1 vì nó có Vietnamese + numbered list
                     debugLog.push(`[RESPONSE] Candidates sau filter: ${candidates.length}`);
-                    if (candidates[0]) {
-                        debugLog.push(`[RESPONSE] Best: len=${candidates[0].len}, hasVI=${candidates[0].hasVietnamese}, hasNumbered=${candidates[0].hasNumberedList}`);
+                    const best = candidates.length > 0 ? candidates[candidates.length - 1] : null;
+                    if (best) {
+                        debugLog.push(`[RESPONSE] Best (last in DOM): domIndex=${best.domIndex}, len=${best.len}`);
                     }
 
                     return {
-                        text: candidates.length > 0 ? candidates[0].text : null,
+                        text: best ? best.text : null,
                         debugLog,
                         candidateCount: candidates.length,
                     };
@@ -672,6 +656,10 @@ class AntigravityBridge {
         const SLOW_THRESHOLD = 3;
         const SLOW_GROWTH = 50;
 
+        // Snapshot trước khi poll — dùng để phân biệt response cũ vs mới
+        const baselineResponse = this.lastResponseText;
+        let skipLogCount = 0;
+
         while (Date.now() - startTime < timeout) {
             if (this.isCancelled) {
                 logger.info('[RESPONSE] Đã hủy bởi user');
@@ -681,7 +669,13 @@ class AntigravityBridge {
             await new Promise(r => setTimeout(r, config.pollInterval));
             pollCount++;
 
-            const currentContent = await this.getLatestResponse();
+            let currentContent;
+            try {
+                currentContent = await this.getLatestResponse();
+            } catch (e) {
+                logger.error(`[RESPONSE] Poll #${pollCount}: getLatestResponse error: ${e.message}`);
+                continue;
+            }
 
             if (!currentContent) continue;
 
@@ -691,10 +685,20 @@ class AntigravityBridge {
                 continue;
             }
 
+            // So sánh với baseline (response trước khi gửi message)
+            if (currentContent === baselineResponse) {
+                skipLogCount++;
+                // Log mỗi 20 lần skip để tránh spam nhưng vẫn visible
+                if (skipLogCount % 20 === 1) {
+                    logger.debug(`[RESPONSE] Poll #${pollCount}: same as baseline (${currentContent.length} chars), waiting for new response...`);
+                }
+                continue;
+            }
+
             const currentLength = currentContent.length;
             const growth = currentLength - lastLength;
 
-            if (currentContent !== lastContent && currentContent !== this.lastResponseText) {
+            if (currentContent !== lastContent) {
                 lastContent = currentContent;
                 stableCount = 0;
 
@@ -714,7 +718,7 @@ class AntigravityBridge {
                 }
 
                 lastLength = currentLength;
-            } else if (currentLength > 30 && currentContent !== this.lastResponseText) {
+            } else if (currentLength > 30) {
                 stableCount++;
                 logger.debug(`[RESPONSE] Poll #${pollCount}: stable ${stableCount}/${STABLE_THRESHOLD}, len=${currentLength}`);
 
@@ -755,6 +759,8 @@ class AntigravityBridge {
         const SLOW_THRESHOLD = 3;
         const SLOW_GROWTH = 50;
 
+        const baselineResponse = this.lastResponseText;
+
         while (Date.now() - startTime < timeout) {
             if (this.isCancelled) {
                 logger.info('[STREAM] Đã hủy');
@@ -769,10 +775,13 @@ class AntigravityBridge {
             const noiseCheck = this.isNoise(currentContent);
             if (noiseCheck.isNoise) continue;
 
+            // Skip baseline response (cũ)
+            if (currentContent === baselineResponse) continue;
+
             const currentLength = currentContent.length;
             const growth = currentLength - lastLength;
 
-            if (currentContent !== lastContent && currentContent !== this.lastResponseText) {
+            if (currentContent !== lastContent) {
                 lastContent = currentContent;
                 stableCount = 0;
 
@@ -799,7 +808,7 @@ class AntigravityBridge {
                 }
 
                 lastLength = currentLength;
-            } else if (currentLength > 30 && currentContent !== this.lastResponseText) {
+            } else if (currentLength > 30) {
                 stableCount++;
                 if (stableCount >= STABLE_THRESHOLD) {
                     this.lastResponseText = currentContent;
@@ -930,7 +939,6 @@ class AntigravityBridge {
             await this.browser.disconnect().catch(() => { });
             this.browser = null;
             this.page = null;
-            this.chatPage = null;
             this.isConnected = false;
             logger.info('[CDP] Đã ngắt kết nối');
         }

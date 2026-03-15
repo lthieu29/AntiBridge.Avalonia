@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtitle Translator — Settings</title>
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <div class="settings-container">
+        <h1 class="settings-title">⚙️ Subtitle Translator Settings</h1>
+
+        <!-- Mode Selector -->
+        <div class="section">
+            <h2 class="section-title">Translation Mode</h2>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="translationMode" value="api" id="modeApi">
+                    <div class="radio-card">
+                        <div class="radio-header">
+                            <span class="radio-icon">🚀</span>
+                            <span class="radio-label">API Direct</span>
+                            <span class="badge badge-fast">Nhanh</span>
+                        </div>
+                        <p class="radio-desc">Gọi 1min.ai API trực tiếp. Nhanh, ổn định. Cần API key.</p>
+                    </div>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="translationMode" value="bridge" id="modeBridge">
+                    <div class="radio-card">
+                        <div class="radio-header">
+                            <span class="radio-icon">🌉</span>
+                            <span class="radio-label">Bridge Server</span>
+                            <span class="badge badge-free">Miễn phí</span>
+                        </div>
+                        <p class="radio-desc">Qua Bridge Server + CDP inject vào Antigravity IDE. Miễn phí nhưng chậm hơn.</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- API Settings -->
+        <div class="section" id="apiSettingsSection">
+            <h2 class="section-title">🔑 API Settings</h2>
+
+            <div class="field">
+                <label for="apiKey">API Key</label>
+                <div class="input-group">
+                    <input type="password" id="apiKey" placeholder="Nhập 1min.ai API key..." autocomplete="off">
+                    <button type="button" class="btn-icon" id="toggleApiKey" title="Hiện/ẩn">👁️</button>
+                </div>
+                <p class="field-hint">Lấy key tại <a href="https://app.1min.ai/settings/api" target="_blank">1min.ai Settings</a></p>
+            </div>
+
+            <div class="field">
+                <label for="apiModel">Model</label>
+                <select id="apiModel">
+                    <optgroup label="💰 Budget (Rẻ nhất)">
+                        <option value="deepseek-chat" selected>DeepSeek Chat — $0.14/M tokens</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash — $0.10/M tokens</option>
+                    </optgroup>
+                    <optgroup label="⚖️ Balanced">
+                        <option value="gpt-4o-mini">GPT-4o Mini — $0.15/M tokens</option>
+                        <option value="qwen-plus">Qwen Plus — $0.32/M tokens</option>
+                    </optgroup>
+                    <optgroup label="🏆 Premium">
+                        <option value="gpt-4o">GPT-4o — $2.50/M tokens</option>
+                        <option value="claude-3.5-sonnet">Claude 3.5 Sonnet — $3.00/M tokens</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="chunkSize">Chunk Size</label>
+                <input type="number" id="chunkSize" value="20" min="5" max="50">
+                <p class="field-hint">Số cue/lần gửi API. Nhỏ hơn = chính xác hơn, lớn hơn = nhanh hơn.</p>
+            </div>
+        </div>
+
+        <!-- Bridge Settings -->
+        <div class="section" id="bridgeSettingsSection" style="display:none;">
+            <h2 class="section-title">🌉 Bridge Server Settings</h2>
+
+            <div class="field">
+                <label for="bridgeUrl">Bridge Server URL</label>
+                <input type="url" id="bridgeUrl" value="http://localhost:3000" placeholder="http://localhost:3000">
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" id="saveBtn">💾 Lưu Settings</button>
+            <button class="btn btn-secondary" id="resetBtn">🔄 Reset Mặc Định</button>
+        </div>
+
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>
