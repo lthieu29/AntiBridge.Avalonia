@@ -64,164 +64,127 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             .catch(err => sendResponse({ error: err.message }));
         return true; // async response
     }
-
-    if (message.type === 'TRANSLATE_API') {
-        // Content script yêu cầu dịch trực tiếp qua API
-        const { vttContent, settings } = message;
-        const tabId = sender.tab?.id;
-
-        console.log(`[BG] TRANSLATE_API: ${vttContent.length} chars, model=${settings.apiModel}`);
-
-        // Keepalive: Chrome MV3 kills service worker after 30s idle
-        const keepAlive = setInterval(() => {
-            console.log('[BG] API keepalive ping');
-        }, 25000);
-
-        // Gọi API translator (async)
-        globalThis.ApiTranslator.translateVttViaApi(
-            vttContent,
-            {
-                apiKey: settings.apiKey,
-                model: settings.apiModel,
-                chunkSize: settings.chunkSize || 20,
-            },
-            // onProgress callback — gửi lại content script
-            (progress) => {
-                if (tabId) {
-                    chrome.tabs.sendMessage(tabId, {
-                        type: 'TRANSLATE_PROGRESS',
-                        progress,
-                    }).catch(() => {});
-                }
-            }
-        ).then(translatedVtt => {
-            // Gửi kết quả về content script
-            if (tabId) {
-                chrome.tabs.sendMessage(tabId, {
-                    type: 'TRANSLATE_COMPLETE',
-                    translatedVtt,
-                }).catch(() => {});
-            }
-        }).catch(err => {
-            console.error(`[BG] TRANSLATE_API error:`, err);
-            if (tabId) {
-                chrome.tabs.sendMessage(tabId, {
-                    type: 'TRANSLATE_ERROR',
-                    error: err.message,
-                }).catch(() => {});
-            }
-        }).finally(() => {
-            clearInterval(keepAlive);
-        });
-
-        sendResponse({ started: true });
-        return true;
-    }
-
-    if (message.type === 'TRANSLATE_BRIDGE') {
-        // Content script yêu cầu dịch qua Bridge Server
-        // Route qua background để tránh Chrome content script fetch bị disconnect
-        const { vttContent, bridgeUrl } = message;
-        const tabId = sender.tab?.id;
-
-        console.log(`[BG] TRANSLATE_BRIDGE: ${vttContent.length} chars → ${bridgeUrl}`);
-
-        // Keepalive: Chrome MV3 kills service worker after 30s idle
-        // Timer giữ worker sống trong suốt quá trình dịch
-        const keepAlive = setInterval(() => {
-            console.log('[BG] Bridge keepalive ping');
-        }, 25000);
-
-        // Gọi Bridge Server SSE từ background
-        fetch(`${bridgeUrl}/api/translate-vtt`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ vttContent }),
-        }).then(async response => {
-            if (!response.ok) {
-                const err = await response.text();
-                throw new Error(`Bridge Server error: ${err}`);
-            }
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-
-                // Parse SSE events
-                const events = buffer.split('\n\n');
-                buffer = events.pop() || '';
-
-                for (const event of events) {
-                    const lines = event.split('\n');
-                    let eventType = '';
-                    let data = '';
-
-                    for (const line of lines) {
-                        if (line.startsWith('event: ')) eventType = line.substring(7);
-                        if (line.startsWith('data: ')) data = line.substring(6);
-                    }
-
-                    if (!eventType || !data) continue;
-
-                    try {
-                        const parsed = JSON.parse(data);
-
-                        if (eventType === 'progress' && tabId) {
-                            chrome.tabs.sendMessage(tabId, {
-                                type: 'TRANSLATE_PROGRESS',
-                                progress: parsed,
-                            }).catch(() => {});
-                        }
-
-                        if (eventType === 'complete' && tabId) {
-                            console.log('[BG] Bridge translation complete, sending to tab');
-                            chrome.tabs.sendMessage(tabId, {
-                                type: 'TRANSLATE_COMPLETE',
-                                translatedVtt: parsed.translatedVtt,
-                            }).catch(() => {});
-                        }
-
-                        if (eventType === 'error' && tabId) {
-                            chrome.tabs.sendMessage(tabId, {
-                                type: 'TRANSLATE_ERROR',
-                                error: parsed.message,
-                            }).catch(() => {});
-                        }
-
-                        if (eventType === 'cancelled' && tabId) {
-                            chrome.tabs.sendMessage(tabId, {
-                                type: 'TRANSLATE_ERROR',
-                                error: 'Đã hủy',
-                            }).catch(() => {});
-                        }
-                    } catch (e) {
-                        console.warn('[BG] Parse SSE error:', e);
-                    }
-                }
-            }
-        }).catch(err => {
-            console.error(`[BG] TRANSLATE_BRIDGE error:`, err);
-            if (tabId) {
-                chrome.tabs.sendMessage(tabId, {
-                    type: 'TRANSLATE_ERROR',
-                    error: err.message,
-                }).catch(() => {});
-            }
-        }).finally(() => {
-            clearInterval(keepAlive);
-            console.log('[BG] Bridge keepalive cleared');
-        });
-
-        sendResponse({ started: true });
-        return true;
-    }
 });
+
+// ==================== PORT-BASED TRANSLATION ====================
+// Port giữ service worker sống suốt quá trình dịch (fix MV3 30s timeout)
+
+chrome.runtime.onConnect.addListener((port) => {
+    if (port.name !== 'translate') return;
+
+    console.log('[BG] Translation port connected');
+
+    port.onMessage.addListener((message) => {
+        if (message.type === 'TRANSLATE_API') {
+            handleApiTranslation(port, message);
+        }
+        if (message.type === 'TRANSLATE_BRIDGE') {
+            handleBridgeTranslation(port, message);
+        }
+    });
+
+    port.onDisconnect.addListener(() => {
+        console.log('[BG] Translation port disconnected');
+    });
+});
+
+/**
+ * API mode: dịch qua 1min.ai API
+ */
+function handleApiTranslation(port, message) {
+    const { vttContent, settings } = message;
+    console.log(`[BG] TRANSLATE_API via port: ${vttContent.length} chars, model=${settings.apiModel}`);
+
+    globalThis.ApiTranslator.translateVttViaApi(
+        vttContent,
+        {
+            apiKey: settings.apiKey,
+            model: settings.apiModel,
+            chunkSize: settings.chunkSize || 20,
+        },
+        (progress) => {
+            try { port.postMessage({ type: 'TRANSLATE_PROGRESS', progress }); } catch (e) {}
+        }
+    ).then(translatedVtt => {
+        try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt }); } catch (e) {}
+    }).catch(err => {
+        console.error('[BG] TRANSLATE_API error:', err);
+        try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
+    }).finally(() => {
+        try { port.disconnect(); } catch (e) {}
+    });
+}
+
+/**
+ * Bridge mode: dịch qua Bridge Server SSE
+ */
+function handleBridgeTranslation(port, message) {
+    const { vttContent, bridgeUrl } = message;
+    console.log(`[BG] TRANSLATE_BRIDGE via port: ${vttContent.length} chars → ${bridgeUrl}`);
+
+    fetch(`${bridgeUrl}/api/translate-vtt`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vttContent }),
+    }).then(async response => {
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`Bridge Server error: ${err}`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const events = buffer.split('\n\n');
+            buffer = events.pop() || '';
+
+            for (const event of events) {
+                const lines = event.split('\n');
+                let eventType = '';
+                let data = '';
+
+                for (const line of lines) {
+                    if (line.startsWith('event: ')) eventType = line.substring(7);
+                    if (line.startsWith('data: ')) data = line.substring(6);
+                }
+
+                if (!eventType || !data) continue;
+
+                try {
+                    const parsed = JSON.parse(data);
+
+                    if (eventType === 'progress') {
+                        try { port.postMessage({ type: 'TRANSLATE_PROGRESS', progress: parsed }); } catch (e) {}
+                    }
+                    if (eventType === 'complete') {
+                        console.log('[BG] Bridge translation complete');
+                        try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt: parsed.translatedVtt }); } catch (e) {}
+                    }
+                    if (eventType === 'error') {
+                        try { port.postMessage({ type: 'TRANSLATE_ERROR', error: parsed.message }); } catch (e) {}
+                    }
+                    if (eventType === 'cancelled') {
+                        try { port.postMessage({ type: 'TRANSLATE_ERROR', error: 'Đã hủy' }); } catch (e) {}
+                    }
+                } catch (e) {
+                    console.warn('[BG] Parse SSE error:', e);
+                }
+            }
+        }
+    }).catch(err => {
+        console.error('[BG] TRANSLATE_BRIDGE error:', err);
+        try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
+    }).finally(() => {
+        try { port.disconnect(); } catch (e) {}
+    });
+}
 
 // Cleanup khi tab đóng
 chrome.tabs.onRemoved.addListener((tabId) => {

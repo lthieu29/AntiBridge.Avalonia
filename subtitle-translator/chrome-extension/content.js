@@ -789,60 +789,77 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
     }
 
-    // API mode: progress from background
-    if (message.type === 'TRANSLATE_PROGRESS') {
-        showProgress(message.progress);
-    }
-
-    // API mode: translation complete from background
-    if (message.type === 'TRANSLATE_COMPLETE') {
-        console.log('[UST] ✅ API dịch xong!');
-        subtitles = parseVttToSubtitles(message.translatedVtt);
-        console.log(`[UST] Loaded ${subtitles.length} translated subtitles`);
-
-        overlayEnabled = true;
-        attachToVideo();
-        positionOverlay();  // Đảm bảo overlay nằm đúng trong video container
-        syncSubtitles();
-        hideProgress();
-
-        const info = document.getElementById('ust-info');
-        if (info) {
-            info.textContent = `✅ Dịch xong ${subtitles.length} phụ đề!`;
-            info.className = 'ust-info ust-info-ok';
-        }
-        const toggleBtn = document.getElementById('ust-toggle-btn');
-        if (toggleBtn) {
-            toggleBtn.disabled = false;
-            toggleBtn.textContent = '👁️ Tắt';
-        }
-        isTranslating = false;
-        const translateBtn = document.getElementById('ust-translate-btn');
-        if (translateBtn) {
-            translateBtn.disabled = false;
-            translateBtn.textContent = '🌐 Dịch Phụ Đề';
-        }
-    }
-
-    // API mode: error from background
-    if (message.type === 'TRANSLATE_ERROR') {
-        console.error('[UST] API error:', message.error);
-        hideProgress();
-        const info = document.getElementById('ust-info');
-        if (info) {
-            info.textContent = `❌ ${message.error}`;
-            info.className = 'ust-info ust-info-err';
-        }
-        isTranslating = false;
-        const translateBtn = document.getElementById('ust-translate-btn');
-        if (translateBtn) {
-            translateBtn.disabled = false;
-            translateBtn.textContent = '🌐 Dịch Phụ Đề';
-        }
-    }
-
     return true;
 });
+
+// ==================== PORT-BASED TRANSLATION ====================
+
+/**
+ * Mở port tới background → gửi task → nhận progress/complete/error
+ * Port giữ service worker sống suốt quá trình dịch (fix MV3 30s timeout)
+ */
+function startTranslationPort(message) {
+    const port = chrome.runtime.connect({ name: 'translate' });
+    console.log('[UST] Translation port opened');
+
+    port.onMessage.addListener((msg) => {
+        if (msg.type === 'TRANSLATE_PROGRESS') {
+            showProgress(msg.progress);
+        }
+
+        if (msg.type === 'TRANSLATE_COMPLETE') {
+            console.log('[UST] ✅ Dịch xong qua port!');
+            subtitles = parseVttToSubtitles(msg.translatedVtt);
+            console.log(`[UST] Loaded ${subtitles.length} translated subtitles`);
+
+            overlayEnabled = true;
+            attachToVideo();
+            positionOverlay();
+            syncSubtitles();
+            hideProgress();
+
+            const info = document.getElementById('ust-info');
+            if (info) {
+                info.textContent = `✅ Dịch xong ${subtitles.length} phụ đề!`;
+                info.className = 'ust-info ust-info-ok';
+            }
+            const toggleBtn = document.getElementById('ust-toggle-btn');
+            if (toggleBtn) {
+                toggleBtn.disabled = false;
+                toggleBtn.textContent = '👁️ Tắt';
+            }
+            isTranslating = false;
+            const translateBtn = document.getElementById('ust-translate-btn');
+            if (translateBtn) {
+                translateBtn.disabled = false;
+                translateBtn.textContent = '🌐 Dịch Phụ Đề';
+            }
+        }
+
+        if (msg.type === 'TRANSLATE_ERROR') {
+            console.error('[UST] Translation error via port:', msg.error);
+            hideProgress();
+            const info = document.getElementById('ust-info');
+            if (info) {
+                info.textContent = `❌ ${msg.error}`;
+                info.className = 'ust-info ust-info-err';
+            }
+            isTranslating = false;
+            const translateBtn = document.getElementById('ust-translate-btn');
+            if (translateBtn) {
+                translateBtn.disabled = false;
+                translateBtn.textContent = '🌐 Dịch Phụ Đề';
+            }
+        }
+    });
+
+    port.onDisconnect.addListener(() => {
+        console.log('[UST] Translation port disconnected');
+    });
+
+    // Gửi task qua port
+    port.postMessage(message);
+}
 
 /**
  * Xử lý bắt đầu dịch
@@ -924,26 +941,24 @@ async function handleStartTranslation() {
         console.log(`[UST] VTT fetched: ${vttContent.length} chars`);
 
         if (currentSettings.translationMode === 'api') {
-            // === API MODE: gửi qua background ===
-            console.log('[UST] Using API mode');
-            chrome.runtime.sendMessage({
+            // === API MODE: qua port (giữ service worker sống) ===
+            console.log('[UST] Using API mode via port');
+            startTranslationPort({
                 type: 'TRANSLATE_API',
                 vttContent,
                 settings: currentSettings,
             });
-            // Response sẽ đến qua TRANSLATE_COMPLETE/TRANSLATE_ERROR messages
             return;
         }
 
-        // === BRIDGE MODE: gửi qua background (tránh content script fetch bị disconnect) ===
-        console.log('[UST] Using Bridge mode');
+        // === BRIDGE MODE: qua port (giữ service worker sống) ===
+        console.log('[UST] Using Bridge mode via port');
         const bridgeUrl = currentSettings.bridgeUrl || DEFAULT_BRIDGE_URL;
-        chrome.runtime.sendMessage({
+        startTranslationPort({
             type: 'TRANSLATE_BRIDGE',
             vttContent,
             bridgeUrl,
         });
-        // Response sẽ đến qua TRANSLATE_COMPLETE/TRANSLATE_ERROR messages
         return;
 
     } catch (err) {
