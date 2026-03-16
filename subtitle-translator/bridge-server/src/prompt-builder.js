@@ -16,7 +16,7 @@ function buildTranslationPrompt(cues, targetLang = 'tiếng Việt') {
         .join(' ');
 
     // Prompt ngắn gọn, rõ ràng, một dòng (vì newlines bị sanitize)
-    const instruction = `Dịch ${cues.length} phụ đề sau sang ${targetLang}. Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích. `;
+    const instruction = `Dịch ${cues.length} phụ đề sau sang ${targetLang}. Giữ nguyên thuật ngữ kỹ thuật tiếng Anh (pod, replicas, API, prompt, AI...). Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích. `;
 
     return instruction + numberedLines;
 }

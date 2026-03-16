@@ -24,7 +24,7 @@ let currentSettings = {
     translationMode: 'openai',
     apiKey: '',           // 1min.ai key (stored in chrome.storage)
     apiModel: 'deepseek-chat',
-    openaiUrl: 'http://dunremote.fastddns.org:10100',
+    openaiUrl: 'https://nano-gpt.com/api',
     openaiKey: '',        // OpenAI key (stored in chrome.storage)
     chunkSize: 20,
     bridgeUrl: DEFAULT_BRIDGE_URL,
@@ -214,7 +214,7 @@ function createTranslatePanel() {
             <div id="ust-openai-fields">
                 <div class="ust-field">
                     <label class="ust-label">🌐 Server URL</label>
-                    <input type="text" id="ust-openai-url" class="ust-input" value="http://dunremote.fastddns.org:10100">
+                    <input type="text" id="ust-openai-url" class="ust-input" value="https://nano-gpt.com/api">
                 </div>
                 <div class="ust-field">
                     <label class="ust-label">🔑 API Key <small>(nếu cần)</small></label>
@@ -384,7 +384,7 @@ function showSettingsView() {
     document.getElementById('ust-mode-bridge').checked = currentSettings.translationMode === 'bridge';
     document.getElementById('ust-api-key').value = currentSettings.apiKey || '';
     document.getElementById('ust-api-model').value = currentSettings.apiModel || 'deepseek-chat';
-    document.getElementById('ust-openai-url').value = currentSettings.openaiUrl || 'http://dunremote.fastddns.org:10100';
+    document.getElementById('ust-openai-url').value = currentSettings.openaiUrl || 'https://nano-gpt.com/api';
     document.getElementById('ust-openai-key').value = currentSettings.openaiKey || '';
     document.getElementById('ust-bridge-url').value = currentSettings.bridgeUrl || DEFAULT_BRIDGE_URL;
 

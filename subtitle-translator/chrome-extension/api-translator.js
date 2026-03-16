@@ -43,7 +43,7 @@ async function translateVttViaApi(vttContent, settings, onProgress) {
         const numberedLines = chunk
             .map((cue, idx) => `${idx + 1}. ${cue.text}`)
             .join(' ');
-        const prompt = `Dịch ${chunk.length} phụ đề sau sang tiếng Việt. Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích. ${numberedLines}`;
+        const prompt = `Dịch ${chunk.length} phụ đề sau sang tiếng Việt. Giữ nguyên thuật ngữ kỹ thuật tiếng Anh (pod, replicas, API, prompt, AI...). Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích. ${numberedLines}`;
 
         // Call API (non-streaming for reliability)
         const response = await callOneminApi(apiKey, model, prompt);
@@ -201,7 +201,7 @@ function reconstructVtt(header, cues, translations) {
 // ==================== OPENAI-COMPATIBLE TRANSLATOR ====================
 
 /**
- * Dịch VTT qua OpenAI-compatible API (dunremote, etc.)
+ * Dịch VTT qua OpenAI-compatible API (nano-gpt.com, etc.)
  */
 async function translateVttViaOpenAi(vttContent, settings, onProgress) {
     const { openaiUrl, openaiKey, chunkSize = 20 } = settings;
@@ -230,7 +230,7 @@ async function translateVttViaOpenAi(vttContent, settings, onProgress) {
         const numberedLines = chunk
             .map((cue, idx) => `${idx + 1}. ${cue.text}`)
             .join('\n');
-        const prompt = `Dịch ${chunk.length} phụ đề sau sang tiếng Việt. Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích.\n${numberedLines}`;
+        const prompt = `Dịch ${chunk.length} phụ đề sau sang tiếng Việt. Giữ nguyên thuật ngữ kỹ thuật tiếng Anh (pod, replicas, API, prompt, AI...). Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích.\n${numberedLines}`;
 
         const response = await callOpenAiCompatible(openaiUrl, openaiKey, prompt);
 
