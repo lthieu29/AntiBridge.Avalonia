@@ -8,6 +8,7 @@ const config = require('./config');
 const logger = require('./logger');
 const translator = require('./translator');
 const antigravity = require('./antigravity');
+const cache = require('./cache');
 
 function createServer() {
     const app = express();
@@ -120,6 +121,32 @@ function createServer() {
             version: '1.0.0',
             status: translator.getStatus(),
         });
+    });
+
+    // === POST /api/cache/get ===
+    app.post('/api/cache/get', (req, res) => {
+        const { vttContent } = req.body;
+        if (!vttContent) {
+            return res.status(400).json({ error: 'vttContent is required' });
+        }
+        const cached = cache.get(vttContent);
+        if (cached) {
+            logger.info(`[API] Cache HIT: ${cached.translatedVtt.length} chars`);
+            res.json({ hit: true, translatedVtt: cached.translatedVtt });
+        } else {
+            res.json({ hit: false });
+        }
+    });
+
+    // === POST /api/cache/set ===
+    app.post('/api/cache/set', (req, res) => {
+        const { vttContent, translatedVtt } = req.body;
+        if (!vttContent || !translatedVtt) {
+            return res.status(400).json({ error: 'vttContent and translatedVtt are required' });
+        }
+        cache.set(vttContent, 'vi', translatedVtt);
+        logger.info(`[API] Cache SET: ${translatedVtt.length} chars`);
+        res.json({ success: true });
     });
 
     return app;

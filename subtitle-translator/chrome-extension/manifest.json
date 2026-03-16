@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Udemy Subtitle Translator",
     "description": "Dịch phụ đề Udemy sang tiếng Việt qua Antigravity",
-    "version": "1.0.6",
+    "version": "1.0.0",
     "permissions": [
         "webRequest",
         "storage",

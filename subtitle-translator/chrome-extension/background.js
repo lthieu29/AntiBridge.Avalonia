@@ -92,57 +92,129 @@ chrome.runtime.onConnect.addListener((port) => {
 });
 
 /**
- * API mode: dịch qua 1min.ai API
+ * Cache helpers — kiểm tra và lưu cache qua bridge server
+ * Nếu server tắt → bỏ qua (graceful)
  */
-function handleApiTranslation(port, message) {
-    const { vttContent, settings } = message;
-    console.log(`[BG] TRANSLATE_API via port: ${vttContent.length} chars, model=${settings.apiModel}`);
+const DEFAULT_BRIDGE = 'http://localhost:3000';
 
-    globalThis.ApiTranslator.translateVttViaApi(
-        vttContent,
-        {
-            apiKey: settings.apiKey,
-            model: settings.apiModel,
-            chunkSize: settings.chunkSize || 20,
-        },
-        (progress) => {
-            try { port.postMessage({ type: 'TRANSLATE_PROGRESS', progress }); } catch (e) {}
+async function checkCache(bridgeUrl, vttContent) {
+    try {
+        const res = await fetch(`${bridgeUrl}/api/cache/get`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vttContent }),
+            signal: AbortSignal.timeout(3000),
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (data.hit) {
+            console.log(`[BG] Cache HIT: ${data.translatedVtt.length} chars`);
+            return data.translatedVtt;
         }
-    ).then(translatedVtt => {
-        try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt }); } catch (e) {}
-    }).catch(err => {
-        console.error('[BG] TRANSLATE_API error:', err);
-        try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
-    }).finally(() => {
-        try { port.disconnect(); } catch (e) {}
+        console.log('[BG] Cache MISS');
+        return null;
+    } catch (e) {
+        console.log('[BG] Cache check skipped (server down)');
+        return null;
+    }
+}
+
+function saveCache(bridgeUrl, vttContent, translatedVtt) {
+    // Fire-and-forget — không block
+    fetch(`${bridgeUrl}/api/cache/set`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vttContent, translatedVtt }),
+        signal: AbortSignal.timeout(5000),
+    }).then(() => {
+        console.log('[BG] Cache SAVED');
+    }).catch(() => {
+        console.log('[BG] Cache save skipped (server down)');
     });
 }
 
 /**
- * OpenAI mode: dịch qua OpenAI-compatible API
+ * API mode: cache-first → 1min.ai API (batch 5) → save cache
  */
-function handleOpenAiTranslation(port, message) {
+async function handleApiTranslation(port, message) {
     const { vttContent, settings } = message;
-    console.log(`[BG] TRANSLATE_OPENAI via port: ${vttContent.length} chars → ${settings.openaiUrl}`);
+    const bridgeUrl = settings.bridgeUrl || DEFAULT_BRIDGE;
+    console.log(`[BG] TRANSLATE_API: ${vttContent.length} chars, model=${settings.apiModel}`);
 
-    globalThis.ApiTranslator.translateVttViaOpenAi(
-        vttContent,
-        {
-            openaiUrl: settings.openaiUrl,
-            openaiKey: settings.openaiKey,
-            chunkSize: settings.chunkSize || 20,
-        },
-        (progress) => {
-            try { port.postMessage({ type: 'TRANSLATE_PROGRESS', progress }); } catch (e) {}
+    try {
+        // 1. Check cache
+        const cached = await checkCache(bridgeUrl, vttContent);
+        if (cached) {
+            try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt: cached }); } catch (e) {}
+            try { port.disconnect(); } catch (e) {}
+            return;
         }
-    ).then(translatedVtt => {
+
+        // 2. Call API (batch 5)
+        const translatedVtt = await globalThis.ApiTranslator.translateVttViaApi(
+            vttContent,
+            {
+                apiKey: settings.apiKey,
+                model: settings.apiModel,
+                chunkSize: settings.chunkSize || 20,
+            },
+            (progress) => {
+                try { port.postMessage({ type: 'TRANSLATE_PROGRESS', progress }); } catch (e) {}
+            }
+        );
+
+        // 3. Save cache (fire-and-forget)
+        saveCache(bridgeUrl, vttContent, translatedVtt);
+
         try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt }); } catch (e) {}
-    }).catch(err => {
+    } catch (err) {
+        console.error('[BG] TRANSLATE_API error:', err);
+        try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
+    } finally {
+        try { port.disconnect(); } catch (e) {}
+    }
+}
+
+/**
+ * OpenAI mode: cache-first → OpenAI API (batch 5) → save cache
+ */
+async function handleOpenAiTranslation(port, message) {
+    const { vttContent, settings } = message;
+    const bridgeUrl = settings.bridgeUrl || DEFAULT_BRIDGE;
+    console.log(`[BG] TRANSLATE_OPENAI: ${vttContent.length} chars → ${settings.openaiUrl}`);
+
+    try {
+        // 1. Check cache
+        const cached = await checkCache(bridgeUrl, vttContent);
+        if (cached) {
+            try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt: cached }); } catch (e) {}
+            try { port.disconnect(); } catch (e) {}
+            return;
+        }
+
+        // 2. Call API (batch 5)
+        const translatedVtt = await globalThis.ApiTranslator.translateVttViaOpenAi(
+            vttContent,
+            {
+                openaiUrl: settings.openaiUrl,
+                openaiKey: settings.openaiKey,
+                chunkSize: settings.chunkSize || 20,
+            },
+            (progress) => {
+                try { port.postMessage({ type: 'TRANSLATE_PROGRESS', progress }); } catch (e) {}
+            }
+        );
+
+        // 3. Save cache (fire-and-forget)
+        saveCache(bridgeUrl, vttContent, translatedVtt);
+
+        try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt }); } catch (e) {}
+    } catch (err) {
         console.error('[BG] TRANSLATE_OPENAI error:', err);
         try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
-    }).finally(() => {
+    } finally {
         try { port.disconnect(); } catch (e) {}
-    });
+    }
 }
 
 /**

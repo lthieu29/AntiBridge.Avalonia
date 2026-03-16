@@ -17,55 +17,23 @@ async function translateVttViaApi(vttContent, settings, onProgress) {
 
     if (!apiKey) throw new Error('API Key chưa được cấu hình');
 
-    // 1. Parse VTT
     const { cues, header } = parseVttSimple(vttContent);
     if (cues.length === 0) throw new Error('Không tìm thấy cue nào trong VTT');
 
-    // 2. Chunk cues
     const chunks = [];
     for (let i = 0; i < cues.length; i += chunkSize) {
         chunks.push(cues.slice(i, i + chunkSize));
     }
 
-    // 3. Dịch từng chunk
-    const allTranslations = new Map();
+    const TRANSLATE_PROMPT = (count, lines) =>
+        `Dịch ${count} phụ đề sau sang tiếng Việt. Giữ nguyên thuật ngữ kỹ thuật tiếng Anh (pod, replicas, API, prompt, AI...). Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích. ${lines}`;
 
-    for (let i = 0; i < chunks.length; i++) {
-        const chunk = chunks[i];
-        const progress = {
-            chunk: i + 1,
-            total: chunks.length,
-            percent: Math.round(((i + 1) / chunks.length) * 100),
-        };
-        onProgress?.(progress);
+    const apiCallFn = (chunk) => {
+        const numberedLines = chunk.map((cue, idx) => `${idx + 1}. ${cue.text}`).join(' ');
+        return callOneminApi(apiKey, model, TRANSLATE_PROMPT(chunk.length, numberedLines));
+    };
 
-        // Build prompt
-        const numberedLines = chunk
-            .map((cue, idx) => `${idx + 1}. ${cue.text}`)
-            .join(' ');
-        const prompt = `Dịch ${chunk.length} phụ đề sau sang tiếng Việt. Giữ nguyên thuật ngữ kỹ thuật tiếng Anh (pod, replicas, API, prompt, AI...). Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích. ${numberedLines}`;
-
-        // Call API (non-streaming for reliability)
-        const response = await callOneminApi(apiKey, model, prompt);
-
-        // Parse translations
-        const translations = parseNumberedResponse(response, chunk.length);
-
-        // Map back to original cue indices
-        for (let j = 0; j < chunk.length; j++) {
-            const promptIdx = j + 1;
-            if (translations.has(promptIdx)) {
-                allTranslations.set(chunk[j].index, translations.get(promptIdx));
-            }
-        }
-
-        // Delay giữa chunks
-        if (i < chunks.length - 1) {
-            await new Promise(r => setTimeout(r, 500));
-        }
-    }
-
-    // 4. Reconstruct VTT
+    const allTranslations = await processChunksBatched(chunks, 5, apiCallFn, onProgress);
     return reconstructVtt(header, cues, allTranslations);
 }
 
@@ -201,7 +169,7 @@ function reconstructVtt(header, cues, translations) {
 // ==================== OPENAI-COMPATIBLE TRANSLATOR ====================
 
 /**
- * Dịch VTT qua OpenAI-compatible API (nano-gpt.com, etc.)
+ * Dịch VTT qua OpenAI-compatible API — batch 5 concurrent
  */
 async function translateVttViaOpenAi(vttContent, settings, onProgress) {
     const { openaiUrl, openaiKey, chunkSize = 20 } = settings;
@@ -216,38 +184,13 @@ async function translateVttViaOpenAi(vttContent, settings, onProgress) {
         chunks.push(cues.slice(i, i + chunkSize));
     }
 
-    const allTranslations = new Map();
-
-    for (let i = 0; i < chunks.length; i++) {
-        const chunk = chunks[i];
-        const progress = {
-            chunk: i + 1,
-            total: chunks.length,
-            percent: Math.round(((i + 1) / chunks.length) * 100),
-        };
-        onProgress?.(progress);
-
-        const numberedLines = chunk
-            .map((cue, idx) => `${idx + 1}. ${cue.text}`)
-            .join('\n');
+    const apiCallFn = (chunk) => {
+        const numberedLines = chunk.map((cue, idx) => `${idx + 1}. ${cue.text}`).join('\n');
         const prompt = `Dịch ${chunk.length} phụ đề sau sang tiếng Việt. Giữ nguyên thuật ngữ kỹ thuật tiếng Anh (pod, replicas, API, prompt, AI...). Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích.\n${numberedLines}`;
+        return callOpenAiCompatible(openaiUrl, openaiKey, prompt);
+    };
 
-        const response = await callOpenAiCompatible(openaiUrl, openaiKey, prompt);
-
-        const translations = parseNumberedResponse(response, chunk.length);
-
-        for (let j = 0; j < chunk.length; j++) {
-            const promptIdx = j + 1;
-            if (translations.has(promptIdx)) {
-                allTranslations.set(chunk[j].index, translations.get(promptIdx));
-            }
-        }
-
-        if (i < chunks.length - 1) {
-            await new Promise(r => setTimeout(r, 300));
-        }
-    }
-
+    const allTranslations = await processChunksBatched(chunks, 5, apiCallFn, onProgress);
     return reconstructVtt(header, cues, allTranslations);
 }
 
@@ -283,11 +226,62 @@ async function callOpenAiCompatible(baseUrl, apiKey, prompt) {
     return content;
 }
 
+// ==================== BATCH PROCESSING ====================
+
+/**
+ * Xử lý chunks theo batch (concurrent)
+ * @param {Array} chunks — mảng chunks, mỗi chunk = mảng cues
+ * @param {number} batchSize — số request chạy song song (default 5)
+ * @param {function} apiCallFn — (chunk) => Promise<string> (trả về response text)
+ * @param {function} onProgress — callback({ chunk, total, percent })
+ * @returns {Map} allTranslations — Map(cueIndex → translatedText)
+ */
+async function processChunksBatched(chunks, batchSize, apiCallFn, onProgress) {
+    const allTranslations = new Map();
+    let completedCount = 0;
+
+    for (let batchStart = 0; batchStart < chunks.length; batchStart += batchSize) {
+        const batchEnd = Math.min(batchStart + batchSize, chunks.length);
+        const batchChunks = chunks.slice(batchStart, batchEnd);
+
+        // Chạy batch song song
+        const promises = batchChunks.map(async (chunk, batchIdx) => {
+            const globalIdx = batchStart + batchIdx;
+
+            const response = await apiCallFn(chunk);
+            const translations = parseNumberedResponse(response, chunk.length);
+
+            // Map translations về cue index gốc
+            for (let j = 0; j < chunk.length; j++) {
+                const promptIdx = j + 1;
+                if (translations.has(promptIdx)) {
+                    allTranslations.set(chunk[j].index, translations.get(promptIdx));
+                }
+            }
+
+            completedCount++;
+            return { globalIdx, translations };
+        });
+
+        await Promise.all(promises);
+
+        // Report progress sau mỗi batch
+        onProgress?.({
+            chunk: Math.min(batchEnd, chunks.length),
+            total: chunks.length,
+            percent: Math.round((completedCount / chunks.length) * 100),
+        });
+    }
+
+    return allTranslations;
+}
+
 // Export for background script
 if (typeof globalThis !== 'undefined') {
     globalThis.ApiTranslator = {
         translateVttViaApi,
         translateVttViaOpenAi,
+        processChunksBatched,
         callOneminApi,
         callOpenAiCompatible,
         parseNumberedResponse,
