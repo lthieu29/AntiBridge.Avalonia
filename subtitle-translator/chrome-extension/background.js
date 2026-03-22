@@ -84,6 +84,9 @@ chrome.runtime.onConnect.addListener((port) => {
         if (message.type === 'TRANSLATE_OPENAI') {
             handleOpenAiTranslation(port, message);
         }
+        if (message.type === 'TRANSLATE_FEATHERLESS') {
+            handleFeatherlessTranslation(port, message);
+        }
     });
 
     port.onDisconnect.addListener(() => {
@@ -141,6 +144,10 @@ async function handleApiTranslation(port, message) {
     const bridgeUrl = settings.bridgeUrl || DEFAULT_BRIDGE;
     console.log(`[BG] TRANSLATE_API: ${vttContent.length} chars, model=${settings.apiModel}`);
 
+    const keepalive = setInterval(() => {
+        try { port.postMessage({ type: 'KEEPALIVE' }); } catch (e) { clearInterval(keepalive); }
+    }, 20000);
+
     try {
         // 1. Check cache
         const cached = await checkCache(bridgeUrl, vttContent);
@@ -171,6 +178,7 @@ async function handleApiTranslation(port, message) {
         console.error('[BG] TRANSLATE_API error:', err);
         try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
     } finally {
+        clearInterval(keepalive);
         try { port.disconnect(); } catch (e) {}
     }
 }
@@ -182,6 +190,10 @@ async function handleOpenAiTranslation(port, message) {
     const { vttContent, settings } = message;
     const bridgeUrl = settings.bridgeUrl || DEFAULT_BRIDGE;
     console.log(`[BG] TRANSLATE_OPENAI: ${vttContent.length} chars → ${settings.openaiUrl}`);
+
+    const keepalive = setInterval(() => {
+        try { port.postMessage({ type: 'KEEPALIVE' }); } catch (e) { clearInterval(keepalive); }
+    }, 20000);
 
     try {
         // 1. Check cache
@@ -213,6 +225,52 @@ async function handleOpenAiTranslation(port, message) {
         console.error('[BG] TRANSLATE_OPENAI error:', err);
         try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
     } finally {
+        clearInterval(keepalive);
+        try { port.disconnect(); } catch (e) {}
+    }
+}
+
+/**
+ * Featherless mode: cache-first → Featherless API (batch 5) → save cache
+ */
+async function handleFeatherlessTranslation(port, message) {
+    const { vttContent, settings } = message;
+    const bridgeUrl = settings.bridgeUrl || DEFAULT_BRIDGE;
+    console.log(`[BG] TRANSLATE_FEATHERLESS: ${vttContent.length} chars`);
+
+    // Keepalive ping — giữ service worker sống suốt quá trình dịch
+    const keepalive = setInterval(() => {
+        try { port.postMessage({ type: 'KEEPALIVE' }); } catch (e) { clearInterval(keepalive); }
+    }, 20000); // ping mỗi 20s
+
+    try {
+        const cached = await checkCache(bridgeUrl, vttContent);
+        if (cached) {
+            try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt: cached }); } catch (e) {}
+            try { port.disconnect(); } catch (e) {}
+            return;
+        }
+
+        const translatedVtt = await globalThis.ApiTranslator.translateVttViaFeatherless(
+            vttContent,
+            {
+                featherlessKey: settings.featherlessKey,
+                chunkSize: settings.chunkSize || 20,
+                featherlessBatchSize: settings.featherlessBatchSize || 1,
+            },
+            (progress) => {
+                try { port.postMessage({ type: 'TRANSLATE_PROGRESS', progress }); } catch (e) {}
+            }
+        );
+
+        saveCache(bridgeUrl, vttContent, translatedVtt);
+
+        try { port.postMessage({ type: 'TRANSLATE_COMPLETE', translatedVtt }); } catch (e) {}
+    } catch (err) {
+        console.error('[BG] TRANSLATE_FEATHERLESS error:', err);
+        try { port.postMessage({ type: 'TRANSLATE_ERROR', error: err.message }); } catch (e) {}
+    } finally {
+        clearInterval(keepalive);
         try { port.disconnect(); } catch (e) {}
     }
 }

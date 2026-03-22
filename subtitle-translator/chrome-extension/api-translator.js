@@ -79,7 +79,11 @@ async function callOneminApi(apiKey, model, prompt) {
  */
 function parseNumberedResponse(response, expectedCount) {
     const translations = new Map();
-    const lines = response.split('\n');
+
+    // Strip <think>...</think> blocks (Qwen3 thinking mode)
+    let cleaned = response.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+    const lines = cleaned.split('\n');
 
     for (const line of lines) {
         const match = line.trim().match(/^(\d+)[.)]\s*(.+)$/);
@@ -276,14 +280,115 @@ async function processChunksBatched(chunks, batchSize, apiCallFn, onProgress) {
     return allTranslations;
 }
 
+// ==================== FEATHERLESS AI TRANSLATOR ====================
+
+/**
+ * Dịch VTT qua Featherless AI (/v1/completions — prompt-based) — batch 5 concurrent
+ */
+async function translateVttViaFeatherless(vttContent, settings, onProgress) {
+    const { featherlessKey, chunkSize = 20, featherlessBatchSize = 1 } = settings;
+
+    if (!featherlessKey) throw new Error('Featherless API Key chưa được cấu hình');
+
+    const { cues, header } = parseVttSimple(vttContent);
+    if (cues.length === 0) throw new Error('Không tìm thấy cue nào trong VTT');
+
+    const chunks = [];
+    for (let i = 0; i < cues.length; i += chunkSize) {
+        chunks.push(cues.slice(i, i + chunkSize));
+    }
+
+    // apiCallFn trả về raw string để processChunksBatched tự parse (tránh double-parse)
+    const apiCallFn = async (chunk) => {
+        const numberedLines = chunk.map((cue, idx) => `${idx + 1}. ${cue.text}`).join('\n');
+        const prompt = `Dịch ${chunk.length} phụ đề sau sang tiếng Việt. Giữ nguyên thuật ngữ kỹ thuật tiếng Anh (pod, replicas, API, prompt, AI...). Trả về đúng format: mỗi dòng bắt đầu bằng số thứ tự và dấu chấm, theo sau là bản dịch. Không thêm giải thích.\n${numberedLines}`;
+        return withRetry(() => callFeatherlessApi(featherlessKey, prompt));
+    };
+
+    const allTranslations = await processChunksBatched(chunks, featherlessBatchSize, apiCallFn, onProgress);
+    return reconstructVtt(header, cues, allTranslations);
+}
+
+/**
+ * Gọi Featherless /v1/chat/completions (chat format)
+ */
+async function callFeatherlessApi(apiKey, prompt) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout
+
+    try {
+        const res = await fetch('https://api.featherless.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                model: 'meta-llama/Meta-Llama-3.1-8B-Instruct',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are a subtitle translator. Translate English to Vietnamese. Keep technical terms in English. Return ONLY the numbered translations. No explanations, no extra text.',
+                    },
+                    { role: 'user', content: prompt },
+                ],
+                temperature: 0.3,
+                max_tokens: 5000,
+            }),
+            signal: controller.signal,
+        });
+
+        if (!res.ok) {
+            const errText = await res.text().catch(() => 'Unknown error');
+            if (res.status === 401) throw new Error('Featherless API Key không hợp lệ');
+            if (res.status === 429) throw new Error('Rate limited — chờ vài giây');
+            throw new Error(`Featherless API error ${res.status}: ${errText.substring(0, 200)}`);
+        }
+
+        const data = await res.json();
+        const content = data?.choices?.[0]?.message?.content;
+        if (!content) throw new Error('Featherless response không có content');
+        return content;
+    } catch (err) {
+        if (err.name === 'AbortError') throw new Error('Featherless timeout (90s)');
+        throw err;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+/**
+ * Retry wrapper — retry tối đa maxRetries lần khi gặp network error
+ */
+async function withRetry(fn, maxRetries = 2) {
+    let lastError;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (err) {
+            lastError = err;
+            const isRetryable = err.message.includes('Failed to fetch')
+                || err.message.includes('timeout')
+                || err.message.includes('network')
+                || err.message.includes('AbortError');
+            if (!isRetryable || attempt === maxRetries) throw err;
+            console.log(`[API] Retry ${attempt + 1}/${maxRetries}: ${err.message}`);
+            await new Promise(r => setTimeout(r, 2000 * (attempt + 1))); // backoff 2s, 4s
+        }
+    }
+    throw lastError;
+}
+
 // Export for background script
 if (typeof globalThis !== 'undefined') {
     globalThis.ApiTranslator = {
         translateVttViaApi,
         translateVttViaOpenAi,
+        translateVttViaFeatherless,
         processChunksBatched,
         callOneminApi,
         callOpenAiCompatible,
+        callFeatherlessApi,
         parseNumberedResponse,
         parseVttSimple,
         reconstructVtt,

@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Udemy Subtitle Translator",
     "description": "Dịch phụ đề Udemy sang tiếng Việt qua Antigravity",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "permissions": [
         "webRequest",
         "storage",
@@ -14,7 +14,8 @@
         "*://api.1min.ai/*",
         "http://localhost:3000/*",
         "http://127.0.0.1:3000/*",
-        "https://nano-gpt.com/*"
+        "https://nano-gpt.com/*",
+        "https://api.featherless.ai/*"
     ],
     "background": {
         "service_worker": "background.js"

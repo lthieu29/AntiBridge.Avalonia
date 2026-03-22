@@ -26,6 +26,8 @@ let currentSettings = {
     apiModel: 'deepseek-chat',
     openaiUrl: 'https://nano-gpt.com/api',
     openaiKey: '',        // OpenAI key (stored in chrome.storage)
+    featherlessKey: '',   // Featherless key (stored in chrome.storage)
+    featherlessBatchSize: 1, // Số lượng request song song cho Featherless
     chunkSize: 20,
     bridgeUrl: DEFAULT_BRIDGE_URL,
 };
@@ -48,6 +50,7 @@ function loadSettings() {
             const keys = result[SECURE_KEYS_KEY];
             if (keys.apiKey) currentSettings.apiKey = keys.apiKey;
             if (keys.openaiKey) currentSettings.openaiKey = keys.openaiKey;
+            if (keys.featherlessKey) currentSettings.featherlessKey = keys.featherlessKey;
         }
         console.log(`[UST] Settings loaded: mode=${currentSettings.translationMode}, model=${currentSettings.apiModel}`);
     });
@@ -69,6 +72,7 @@ function saveSettings() {
             [SECURE_KEYS_KEY]: {
                 apiKey: currentSettings.apiKey,
                 openaiKey: currentSettings.openaiKey,
+                featherlessKey: currentSettings.featherlessKey,
             }
         });
 
@@ -207,6 +211,7 @@ function createTranslatePanel() {
                 <label class="ust-label">Translation Mode</label>
                 <div class="ust-radio-group">
                     <label class="ust-radio"><input type="radio" name="ust-mode" value="openai" id="ust-mode-openai"> 🤖 OpenAI API <small>(deepseek-v3.2)</small></label>
+                    <label class="ust-radio"><input type="radio" name="ust-mode" value="featherless" id="ust-mode-featherless"> 🪶 Featherless <small>(Llama-3.1-8B)</small></label>
                     <label class="ust-radio"><input type="radio" name="ust-mode" value="api" id="ust-mode-api"> 🚀 1min.ai <small>(nhiều model)</small></label>
                     <label class="ust-radio"><input type="radio" name="ust-mode" value="bridge" id="ust-mode-bridge"> 🌉 Bridge Server <small>(miễn phí)</small></label>
                 </div>
@@ -222,6 +227,19 @@ function createTranslatePanel() {
                 </div>
                 <div class="ust-field">
                     <label class="ust-label">📌 Model: <code>deepseek/deepseek-v3.2</code> (cố định)</label>
+                </div>
+            </div>
+            <div id="ust-featherless-fields" style="display:none;">
+                <div class="ust-field">
+                    <label class="ust-label">🔑 Featherless API Key</label>
+                    <input type="password" id="ust-featherless-key" class="ust-input" placeholder="Nhập Featherless API key...">
+                </div>
+                <div class="ust-field">
+                    <label class="ust-label">⚡ Batch size <small>(số luồng song song, default 1)</small></label>
+                    <input type="number" id="ust-featherless-batch" class="ust-input" min="1" max="10" value="1" style="width:80px;">
+                </div>
+                <div class="ust-field">
+                    <label class="ust-label">📌 Model: <code>meta-llama/Meta-Llama-3.1-8B-Instruct</code> (cố định)</label>
                 </div>
             </div>
             <div id="ust-api-fields" style="display:none;">
@@ -291,6 +309,7 @@ function createTranslatePanel() {
     // Event: Save settings
     document.getElementById('ust-save-settings').addEventListener('click', () => {
         let mode = 'openai';
+        if (document.getElementById('ust-mode-featherless').checked) mode = 'featherless';
         if (document.getElementById('ust-mode-api').checked) mode = 'api';
         if (document.getElementById('ust-mode-bridge').checked) mode = 'bridge';
 
@@ -298,6 +317,8 @@ function createTranslatePanel() {
         const apiModel = document.getElementById('ust-api-model').value;
         const openaiUrl = document.getElementById('ust-openai-url').value.trim();
         const openaiKey = document.getElementById('ust-openai-key').value.trim();
+        const featherlessKey = document.getElementById('ust-featherless-key').value.trim();
+        const featherlessBatchSize = parseInt(document.getElementById('ust-featherless-batch').value) || 1;
         const bridgeUrl = document.getElementById('ust-bridge-url').value.trim() || DEFAULT_BRIDGE_URL;
 
         if (mode === 'api' && !apiKey) {
@@ -311,11 +332,19 @@ function createTranslatePanel() {
             return;
         }
 
+        if (mode === 'featherless' && !featherlessKey) {
+            const info = document.getElementById('ust-settings-info');
+            if (info) { info.textContent = '⚠️ Vui lòng nhập Featherless API Key'; info.className = 'ust-info ust-info-err'; }
+            return;
+        }
+
         currentSettings.translationMode = mode;
         currentSettings.apiKey = apiKey;
         currentSettings.apiModel = apiModel;
         currentSettings.openaiUrl = openaiUrl;
         currentSettings.openaiKey = openaiKey;
+        currentSettings.featherlessKey = featherlessKey;
+        currentSettings.featherlessBatchSize = featherlessBatchSize;
         currentSettings.bridgeUrl = bridgeUrl;
         saveSettings();
 
@@ -334,6 +363,7 @@ function createTranslatePanel() {
     function updateModeFields() {
         const mode = document.querySelector('input[name="ust-mode"]:checked')?.value || 'openai';
         document.getElementById('ust-openai-fields').style.display = mode === 'openai' ? 'block' : 'none';
+        document.getElementById('ust-featherless-fields').style.display = mode === 'featherless' ? 'block' : 'none';
         document.getElementById('ust-api-fields').style.display = mode === 'api' ? 'block' : 'none';
         document.getElementById('ust-bridge-fields').style.display = mode === 'bridge' ? 'block' : 'none';
     }
@@ -380,17 +410,21 @@ function showSettingsView() {
 
     // Fill current settings
     document.getElementById('ust-mode-openai').checked = currentSettings.translationMode === 'openai';
+    document.getElementById('ust-mode-featherless').checked = currentSettings.translationMode === 'featherless';
     document.getElementById('ust-mode-api').checked = currentSettings.translationMode === 'api';
     document.getElementById('ust-mode-bridge').checked = currentSettings.translationMode === 'bridge';
     document.getElementById('ust-api-key').value = currentSettings.apiKey || '';
     document.getElementById('ust-api-model').value = currentSettings.apiModel || 'deepseek-chat';
     document.getElementById('ust-openai-url').value = currentSettings.openaiUrl || 'https://nano-gpt.com/api';
     document.getElementById('ust-openai-key').value = currentSettings.openaiKey || '';
+    document.getElementById('ust-featherless-key').value = currentSettings.featherlessKey || '';
+    document.getElementById('ust-featherless-batch').value = currentSettings.featherlessBatchSize ?? 1;
     document.getElementById('ust-bridge-url').value = currentSettings.bridgeUrl || DEFAULT_BRIDGE_URL;
 
     // Toggle fields visibility
     const mode = currentSettings.translationMode;
     document.getElementById('ust-openai-fields').style.display = mode === 'openai' ? 'block' : 'none';
+    document.getElementById('ust-featherless-fields').style.display = mode === 'featherless' ? 'block' : 'none';
     document.getElementById('ust-api-fields').style.display = mode === 'api' ? 'block' : 'none';
     document.getElementById('ust-bridge-fields').style.display = mode === 'bridge' ? 'block' : 'none';
 
@@ -409,6 +443,9 @@ function updateModeIndicator() {
     if (currentSettings.translationMode === 'openai') {
         indicator.textContent = '🤖 OpenAI — deepseek-v3.2';
         indicator.className = 'ust-mode-indicator ust-mode-api';
+    } else if (currentSettings.translationMode === 'featherless') {
+        indicator.textContent = '🪶 Featherless — Llama-3.1-8B';
+        indicator.className = 'ust-mode-indicator ust-mode-api';
     } else if (currentSettings.translationMode === 'api') {
         indicator.textContent = `🚀 1min.ai — ${currentSettings.apiModel}`;
         indicator.className = 'ust-mode-indicator ust-mode-api';
@@ -424,10 +461,31 @@ function updateModeIndicator() {
 async function checkConnectionStatus() {
     if (currentSettings.translationMode === 'openai') {
         await checkOpenAiStatus();
+    } else if (currentSettings.translationMode === 'featherless') {
+        await checkFeatherlessStatus();
     } else if (currentSettings.translationMode === 'api') {
         await checkApiStatus();
     } else {
         await checkBridgeStatus();
+    }
+}
+
+/**
+ * Check Featherless mode status
+ */
+async function checkFeatherlessStatus() {
+    const dot = document.getElementById('ust-bridge-dot');
+    const label = document.getElementById('ust-bridge-label');
+    if (!dot || !label) return false;
+
+    if (currentSettings.featherlessKey) {
+        dot.className = 'ust-dot ust-dot-ok';
+        label.textContent = 'Featherless ✅ (Llama-3.1-8B)';
+        return true;
+    } else {
+        dot.className = 'ust-dot ust-dot-err';
+        label.textContent = 'Featherless Key ❌ (Mở Settings)';
+        return false;
     }
 }
 
@@ -1001,7 +1059,16 @@ async function handleStartTranslation() {
     }
 
     // Validation based on mode
-    if (currentSettings.translationMode === 'openai') {
+    if (currentSettings.translationMode === 'featherless') {
+        if (!currentSettings.featherlessKey) {
+            const info = document.getElementById('ust-info');
+            if (info) {
+                info.textContent = 'Chưa có Featherless API Key! Mở Settings để cấu hình.';
+                info.className = 'ust-info ust-info-err';
+            }
+            return;
+        }
+    } else if (currentSettings.translationMode === 'openai') {
         if (!currentSettings.openaiUrl) {
             const info = document.getElementById('ust-info');
             if (info) {
@@ -1057,10 +1124,19 @@ async function handleStartTranslation() {
         console.log(`[UST] VTT fetched: ${vttContent.length} chars`);
 
         if (currentSettings.translationMode === 'openai') {
-            // === OPENAI MODE: qua port ===
             console.log('[UST] Using OpenAI mode via port');
             startTranslationPort({
                 type: 'TRANSLATE_OPENAI',
+                vttContent,
+                settings: currentSettings,
+            });
+            return;
+        }
+
+        if (currentSettings.translationMode === 'featherless') {
+            console.log('[UST] Using Featherless mode via port');
+            startTranslationPort({
+                type: 'TRANSLATE_FEATHERLESS',
                 vttContent,
                 settings: currentSettings,
             });
@@ -1150,7 +1226,6 @@ function watchUrlChanges() {
 function onUrlChange() {
     console.log('urlChange');
     const newUrl = window.location.href;
-    if (newUrl === lastUrl) return;
 
     // Chỉ trigger khi chuyển video (URL chứa /lecture/)
     const isLecture = newUrl.includes('/lecture/') || newUrl.includes('/learn/');
@@ -1212,7 +1287,12 @@ async function autoLoadSubtitle() {
         await sleep(1500);
 
         // Tìm nút "Tắt" 
-        if (ccButton) ccButton.click(); // Mở lại menu
+        if (ccButton) {
+            // ccButton.click(); // Mở lại menu (Menu đỡ mở sẵn --> Comment lại)
+            console.log('[UST] Clicked CC button');
+        } else {
+            console.log('[UST] ⚠️ Không tìm thấy button "Tắt"');
+        }
         await sleep(500);
 
         const allButtons = document.querySelectorAll('.ud-popper-open .ud-unstyled-list li button');
@@ -1224,6 +1304,8 @@ async function autoLoadSubtitle() {
                 break;
             }
         }
+
+        ccButton.click(); // Đóng menu
     } else {
         console.log('[UST] ⚠️ Không tìm thấy button "Tiếng Anh"');
         // Đóng menu nếu đã mở
