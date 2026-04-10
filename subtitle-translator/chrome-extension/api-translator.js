@@ -324,7 +324,7 @@ async function callFeatherlessApi(apiKey, prompt) {
                 'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: 'meta-llama/Meta-Llama-3.1-8B-Instruct',
+                model: 'Sunbird/translategemma-12b-ug40-sft-merged',
                 messages: [
                     {
                         role: 'system',
